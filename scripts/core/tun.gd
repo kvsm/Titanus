@@ -52,27 +52,30 @@ const WEAPON_MAX := 6
 const WEAPONS: Array[String] = ["vulcan", "laser", "wave"]
 
 # --- weapons (§5). Streams are [x offset, angle in degrees from straight up].
+# Vulcan "heavy" streams fire big forward slugs dealing heavy_dmg: from L4 the focused
+# forward damage sits between the Wave and the Laser, while the spread keeps crowd control.
 const VULCAN := [
 	{"interval": 0.075, "dmg": 1.5, "streams": [[-4, 0], [4, 0]]},
 	{"interval": 0.075, "dmg": 1.4, "streams": [[-5, -4], [0, 0], [5, 4]]},
 	{"interval": 0.075, "dmg": 1.3, "streams": [[-6, -8], [-2, 0], [2, 0], [6, 8]]},
-	{"interval": 0.075, "dmg": 1.35, "streams": [[-8, -14], [-4, -6], [0, 0], [4, 6], [8, 14]],
-		"side": [[-6, -35], [6, 35]]},
-	{"interval": 0.07, "dmg": 1.35, "streams": [[-10, -18], [-6, -9], [-2, -2], [2, 2], [6, 9], [10, 18]],
-		"side": [[-6, -35], [6, 35]]},
-	{"interval": 0.065, "dmg": 1.35, "streams": [[-12, -22], [-8, -12], [-4, -4], [0, 0], [4, 4], [8, 12], [12, 22]],
+	{"interval": 0.075, "dmg": 1.35, "heavy_dmg": 3.2, "heavy": [[-3, 0], [3, 0]],
+		"streams": [[-8, -10], [8, 10], [-10, -16], [10, 16]], "side": [[-6, -35], [6, 35]]},
+	{"interval": 0.07, "dmg": 1.35, "heavy_dmg": 2.4, "heavy": [[-4, 0], [0, 0], [4, 0]],
+		"streams": [[-9, -10], [9, 10], [-11, -18], [11, 18]], "side": [[-6, -35], [6, 35]]},
+	{"interval": 0.065, "dmg": 1.35, "heavy_dmg": 2.6, "heavy": [[-4, 0], [0, 0], [4, 0]],
+		"streams": [[-9, -8], [9, 8], [-11, -14], [11, 14], [-12, -22], [12, 22]],
 		"side": [[-6, -35], [6, 35], [-6, -55], [6, 55]]},
 ]
 const VULCAN_SPEED := 520.0
 const LASER_WIDTH: Array[float] = [4.0, 6.0, 8.0, 12.0, 15.0, 18.0]
 const LASER_DPS: Array[float] = [50.0, 70.0, 90.0, 115.0, 135.0, 155.0]
 const WAVE := [
-	{"interval": 0.22, "dmg": 7.8, "angles": [0]},
-	{"interval": 0.22, "dmg": 10.8, "angles": [0]},
-	{"interval": 0.22, "dmg": 13.8, "angles": [-14, 0, 14]},
-	{"interval": 0.22, "dmg": 17.8, "angles": [-16, 0, 16]},
-	{"interval": 0.2, "dmg": 19.0, "angles": [-16, 0, 16]},
-	{"interval": 0.2, "dmg": 21.0, "angles": [-26, -13, 0, 13, 26]},
+	{"interval": 0.22, "dmg": 7.0, "angles": [0]},
+	{"interval": 0.22, "dmg": 9.7, "angles": [0]},
+	{"interval": 0.22, "dmg": 12.4, "angles": [-14, 0, 14]},
+	{"interval": 0.22, "dmg": 16.0, "angles": [-16, 0, 16]},
+	{"interval": 0.2, "dmg": 17.1, "angles": [-16, 0, 16]},
+	{"interval": 0.2, "dmg": 18.9, "angles": [-26, -13, 0, 13, 26]},
 ]
 const WAVE_SPEED := 300.0
 
@@ -84,11 +87,11 @@ const ENEMIES := {
 	"turret": {"hp": 18.0, "half": Vector2(7, 7), "score": 500, "tex": "turret_base"},
 	"car": {"hp": 12.0, "half": Vector2(9, 5), "score": 400, "tex": "car"},
 	"carrier": {"hp": 70.0, "half": Vector2(15, 13), "score": 2000, "tex": "carrier"},
-	"subwoofer": {"hp": 450.0, "half": Vector2(21, 21), "score": 10000, "tex": "subwoofer"},
+	"subwoofer": {"hp": 1100.0, "half": Vector2(21, 21), "score": 10000, "tex": "subwoofer"},
 	"note": {"hp": 4.0, "half": Vector2(4, 4), "score": 150, "tex": "note"},
 	# stronger late-level enemies
-	"prism": {"hp": 40.0, "half": Vector2(10, 11), "score": 1500, "tex": "prism"},
-	"equalizer": {"hp": 110.0, "half": Vector2(21, 11), "score": 3000, "tex": "equalizer"},
+	"prism": {"hp": 90.0, "half": Vector2(10, 11), "score": 1500, "tex": "prism"},
+	"equalizer": {"hp": 260.0, "half": Vector2(21, 11), "score": 3000, "tex": "equalizer"},
 }
 
 # random pickup drops from any enemy kill (each rolled independently)
@@ -104,6 +107,7 @@ const HELIOS_ARM_HP := 350.0
 const HELIOS_CORE_HP := 1800.0
 const HELIOS_PHASE2_TIME := 35.0
 const HELIOS_PHASE3_FRACTION := 0.4
+const HELIOS_BULLET_SPEED := 1.15 # multiplier on every HELIOS bullet speed
 
 # --- palette (§7.2)
 const C_MIDNIGHT := Color("0d0221")

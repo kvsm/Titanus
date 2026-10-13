@@ -181,7 +181,7 @@ func _fire_arms(dt: float, interval: float) -> void:
 	if arm.dead or not game.player.alive:
 		return
 	var muzzle := arm.global_position + Vector2(0, 26)
-	game.bullets.fan(muzzle, game.bullets.aim(muzzle), 5, 40.0, 95.0, Tun.B.ORANGE)
+	game.bullets.fan(muzzle, game.bullets.aim(muzzle), 5, 40.0, 95.0 * Tun.HELIOS_BULLET_SPEED, Tun.B.ORANGE)
 	Audio.play("enemy_shot")
 
 
@@ -200,8 +200,8 @@ func _spiral(dt: float, interval: float, speed: float) -> void:
 		_spiral_t += interval
 		_spiral_a += 0.23
 		var c := core.global_position
-		game.bullets.fire(c, _spiral_a, speed, Tun.B.PINK)
-		game.bullets.fire(c, _spiral_a + PI, speed, Tun.B.PINK)
+		game.bullets.fire(c, _spiral_a, speed * Tun.HELIOS_BULLET_SPEED, Tun.B.PINK)
+		game.bullets.fire(c, _spiral_a + PI, speed * Tun.HELIOS_BULLET_SPEED, Tun.B.PINK)
 
 
 func _volley(dt: float) -> void:
@@ -209,7 +209,7 @@ func _volley(dt: float) -> void:
 	if _volley_t <= 0.0:
 		_volley_t = 2.0
 		var c := core.global_position
-		game.bullets.fan(c, game.bullets.aim(c), 3, 16.0, 110.0, Tun.B.BIG)
+		game.bullets.fan(c, game.bullets.aim(c), 3, 16.0, 110.0 * Tun.HELIOS_BULLET_SPEED, Tun.B.BIG)
 
 
 func _supernova(dt: float) -> void:
@@ -235,12 +235,12 @@ func _supernova(dt: float) -> void:
 		_ring_t -= dt
 		if _ring_t <= 0.0:
 			_ring_t = 0.8
-			game.bullets.ring(c, 18, 85.0, Tun.B.VIOLET, randf() * TAU)
+			game.bullets.ring(c, 18, 85.0 * Tun.HELIOS_BULLET_SPEED, Tun.B.VIOLET, randf() * TAU)
 			Audio.play("enemy_shot")
 		_rain_t -= dt
 		if _rain_t <= 0.0:
 			_rain_t = 0.14
-			game.bullets.fire(Vector2(randf_range(8, Tun.SCREEN.x - 8), -4), PI / 2.0 + randf_range(-0.1, 0.1), 110.0, Tun.B.PINK)
+			game.bullets.fire(Vector2(randf_range(8, Tun.SCREEN.x - 8), -4), PI / 2.0 + randf_range(-0.1, 0.1), 110.0 * Tun.HELIOS_BULLET_SPEED, Tun.B.PINK)
 		_spiral(dt, 0.16, 70.0)
 	if _cycle_t >= 7.0:
 		_cycle_t = 0.0

@@ -7,7 +7,8 @@ class Shot:
 	var pos: Vector2
 	var vel: Vector2
 	var dmg: float
-	var wave_level := 0 # 0 = vulcan, 1..4 = wave crescent
+	var wave_level := 0 # 0 = vulcan, 1..WEAPON_MAX = wave crescent
+	var heavy := false # Vulcan forward slug
 	var half := Vector2(1.5, 4)
 	var hits := {}
 
@@ -15,11 +16,13 @@ var game: Game
 var shots: Array[Shot] = []
 
 var _vulcan_tex: Texture2D
+var _heavy_tex: Texture2D
 var _wave_tex: Array[Texture2D] = []
 
 
 func _ready() -> void:
 	_vulcan_tex = Tun.tex("shot_vulcan")
+	_heavy_tex = Tun.tex("shot_vulcan_heavy")
 	for l in range(1, Tun.WEAPON_MAX + 1):
 		_wave_tex.append(Tun.tex("shot_wave_%d" % l))
 
@@ -28,8 +31,9 @@ func clear() -> void:
 	shots.clear()
 
 
-func fire_vulcan(from: Vector2, angle_deg: float, dmg: float) -> void:
+func fire_vulcan(from: Vector2, angle_deg: float, dmg: float, heavy: bool = false) -> void:
 	var s := Shot.new()
+	s.heavy = heavy
 	s.pos = from
 	s.vel = Vector2.UP.rotated(deg_to_rad(angle_deg)) * Tun.VULCAN_SPEED
 	s.dmg = dmg
@@ -81,7 +85,9 @@ func update(dt: float, targets: Array[Target]) -> void:
 
 func _draw() -> void:
 	for s in shots:
-		if s.wave_level == 0:
+		if s.heavy:
+			draw_texture(_heavy_tex, (s.pos - Vector2(2, 5)).round())
+		elif s.wave_level == 0:
 			draw_texture(_vulcan_tex, (s.pos - Vector2(1, 4)).round())
 		else:
 			var t := _wave_tex[s.wave_level - 1]

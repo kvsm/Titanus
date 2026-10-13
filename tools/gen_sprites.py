@@ -569,6 +569,14 @@ def gen_bullets():
     d.rectangle([1, 0, 1, 5], fill=C("9"))
     save(vul, "sprites", "shot_vulcan.png")
 
+    # heavy forward slug used by Vulcan L4+ (more damage, straight ahead)
+    heavy = Image.new("RGBA", (5, 11), (0, 0, 0, 0))
+    d = ImageDraw.Draw(heavy)
+    d.rectangle([0, 2, 4, 10], fill=C("7", 200))
+    d.rectangle([1, 1, 3, 9], fill=C("8"))
+    d.rectangle([2, 0, 2, 7], fill=C("w"))
+    save(heavy, "sprites", "shot_vulcan_heavy.png")
+
     for lvl, w in enumerate((12, 16, 20, 26, 30, 34), start=1):
         img = Image.new("RGBA", (w, 7), (0, 0, 0, 0))
         px = img.load()

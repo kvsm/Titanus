@@ -97,7 +97,7 @@ Three weapon types. Each one has **power levels 1–6**.
 
 | Type | Colour | Role | Description |
 |---|---|---|---|
-| **Vulcan** | Sun-yellow / orange | Coverage | Rapid small bullets. Its spread widens with level: L1 twin stream → L6 seven streams in a fan plus two pairs of angled side shots. |
+| **Vulcan** | Sun-yellow / orange | Coverage | Rapid small bullets. Its spread widens with level: L1 twin stream → L6 wide fan plus side shots. From **L4**, the straight-ahead streams become **heavy slugs** whose focused damage sits between the Wave and the Laser. |
 | **Laser** | Hot pink | Single-target | A continuous piercing beam straight up. Width 4 / 6 / 8 / 12 px. Highest damage per second, but you have to line up. |
 | **Wave** | Cyan | Crowd control | Expanding sine-wave crescents that pierce. Wide arc, slower rate of fire, lower damage per hit. |
 
@@ -105,12 +105,12 @@ Three weapon types. Each one has **power levels 1–6**.
 
 | Level | Vulcan | Laser | Wave |
 |---|---|---|---|
-| 1 | 40 | 50 | 35 |
-| 2 | 55 | 70 | 48 |
-| 3 | 70 | 90 | 62 |
-| 4 | 90 | 115 | 80 |
-| 5 | ~105 | 135 | ~95 |
-| 6 | ~120 | 155 | ~105 |
+| 1 | 40 | 50 | 31 |
+| 2 | 55 | 70 | 44 |
+| 3 | 70 | 90 | 56 |
+| 4 | ~85 (heavy slugs) | 115 | 72 |
+| 5 | ~103 (heavy slugs) | 135 | ~86 |
+| 6 | ~120 (heavy slugs) | 155 | ~95 |
 
 Vulcan and Wave have lower peak damage but hit many targets at once. All values are tunable.
 
@@ -205,9 +205,9 @@ The level is data-driven (a timeline file listing time, enemy type, formation, p
 | **Rooftop turret** | 16×16 (ground) | 18 | 500 | Fixed to the city layer and scrolls with it | Aimed 3-shot burst every 2 s, telegraphed by a muzzle glow |
 | **Hover car** | 20×12 | 12 | 400 | Crosses horizontally in lanes, leaves a light trail; slows mid-screen | Drops a 3-way downward fan mid-crossing |
 | **Carrier "Bassline"** (gunship) | 32×28 | 70 | 2,000 | Slow descent to the upper third, strafes, leaves after 8 s | Rotating 6-way rings; **drops a weapon capsule** |
-| **PRISM** (crystal gunship, late) | 22×24 | 40 | 1,500 | Descends, hovers with a slow sway, retreats after 3 volleys | Telegraphed glow, then 3 slow crystal shards that **burst into 6-bullet rings** after 0.9 s |
-| **EQUALIZER** (heavy gunship, late) | 46×26 | 110 | 3,000 | Slow descent, wide sway, leaves after 9 s | Fan-shaped curtain from its five EQ bars, firing for 1.4 s in every 2.2 s. **A two-bar gap walks across the curtain**, and that's where you dodge. |
-| **Mid-boss SUBWOOFER** (tank) | 48×48 | 450 | 10,000 | Rolls down the highway, stops, pulses | Expanding 16-bullet rings **on the music's beat**, with aimed shots between them |
+| **PRISM** (crystal gunship, late) | 22×24 | 90 | 1,500 | Descends, hovers with a slow sway, retreats after 3 volleys | Telegraphed glow, then 3 slow crystal shards that **burst into 6-bullet rings** after 0.9 s |
+| **EQUALIZER** (heavy gunship, late) | 46×26 | 260 | 3,000 | Slow descent, wide sway, leaves after 9 s | Fan-shaped curtain from its five EQ bars, firing for 1.4 s in every 2.2 s. **A two-bar gap walks across the curtain**, and that's where you dodge. |
+| **Mid-boss SUBWOOFER** (tank) | 48×48 | 1,100 | 10,000 | Rolls down the highway, stops, pulses | Expanding 16-bullet rings **on the music's beat**, with aimed shots between them |
 
 Escape rule: enemies that leave (Strobe retreating, carrier leaving, hover cars exiting) must have enough time on screen to be killed, and leaving breaks the chain.
 
@@ -217,7 +217,7 @@ Escape rule: enemies that leave (Strobe retreating, carrier leaving, hover cars 
 
 A colossal chrome mech rising from behind the skyline. It fills the top ~40% of the screen (≈ 150 × 110 px), with a **striped synthwave sun as its chest core**. Its armour plating glows with neon circuitry.
 
-**Parts:** left arm cannon (350 HP), right arm cannon (350 HP), core (1,800 HP; can only be hit once the chest opens). Destroying an arm adds to the chain and gives 5,000 × multiplier.
+**Parts:** left arm cannon (350 HP), right arm cannon (350 HP), core (1,800 HP; can only be hit once the chest opens). Destroying an arm adds to the chain and gives 5,000 × multiplier. All HELIOS bullets fly at 1.15× the base enemy bullet speeds (`HELIOS_BULLET_SPEED`).
 
 | Phase | Trigger | Pattern |
 |---|---|---|
