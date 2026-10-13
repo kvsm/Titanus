@@ -34,7 +34,7 @@
 ## 3. Controls
 
 ### 3.1 Movement: follow the finger
-- While a finger is down, the ship moves **toward the touch point**, with **speed capped at `max_speed`**.
+- While a finger is down, the ship moves **toward the touch point**, with **speed capped at the ship's current speed** (starts at `speed_base`, raised by speed power-ups up to `speed_max`).
 - The ship never teleports. A touch far from the ship makes it travel there at max speed.
 - Arrival is smooth: inside a small radius the speed eases off so the ship stops on the point instead of jittering.
 - When the finger lifts, the ship **stays where it is** (and keeps firing).
@@ -43,7 +43,8 @@
 
 | Tunable | Start value |
 |---|---|
-| `max_speed` | 320 px/s (crossing the 270 px width takes ~0.85 s) |
+| `speed_base` | 160 px/s at the start of a level |
+| `speed_max` | 320 px/s, reached with speed power-ups (crossing the 270 px width takes ~0.85 s) |
 | `arrive_radius` | 6 px |
 | `touch_offset_y` | 0 px |
 
@@ -60,7 +61,7 @@
 Chosen with the CONTROLS button on the title screen or in the pause menu.
 
 - **Steering:** "marble" style. Lower the right edge to move right; tip the top away to move up.
-- **Speed:** proportional to the tilt angle from the neutral pose, capped at `max_speed`. A 0.75° deadzone is ignored; full speed comes at 26° / 18° / 12° (sensitivity LOW / MED / HIGH).
+- **Speed:** proportional to the tilt angle from the neutral pose, capped at the ship's current speed. A 0.75° deadzone is ignored; full speed comes at 26° / 18° / 12° (sensitivity LOW / MED / HIGH).
 - **Neutral pose:** captured when the level starts and again on every resume from pause.
 - **Smoothing:** sensor readings are low-pass filtered to remove jitter.
 - **Bomb:** with no steering finger, **any tap** (outside the pause button) fires a bomb.
@@ -93,11 +94,11 @@ Chosen with the CONTROLS button on the title screen or in the pause menu.
 
 ## 5. Weapons
 
-Three weapon types. Each one has **power levels 1–6**.
+Three weapon types. Each one has **power levels 1–10**. Damage for every level above L1 was cut by 10% in the v0.1 tuning pass.
 
 | Type | Colour | Role | Description |
 |---|---|---|---|
-| **Vulcan** | Sun-yellow / orange | Coverage | Rapid small bullets. Its spread widens with level: L1 twin stream → L6 wide fan plus side shots. From **L4**, the straight-ahead streams become **heavy slugs** whose focused damage sits between the Wave and the Laser. |
+| **Vulcan** | Sun-yellow / orange | Coverage | Rapid small bullets. Its spread widens with level: L1 twin stream → L10 wide fan plus three pairs of side shots. From **L4**, the straight-ahead streams become **heavy slugs** whose focused damage sits between the Wave and the Laser. |
 | **Laser** | Hot pink | Single-target | A continuous piercing beam straight up. Width 4 / 6 / 8 / 12 px. Highest damage per second, but you have to line up. |
 | **Wave** | Cyan | Crowd control | Expanding sine-wave crescents that pierce. Wide arc, slower rate of fire, lower damage per hit. |
 
@@ -105,21 +106,28 @@ Three weapon types. Each one has **power levels 1–6**.
 
 | Level | Vulcan | Laser | Wave |
 |---|---|---|---|
-| 1 | 40 | 50 | 31 |
-| 2 | 55 | 70 | 44 |
-| 3 | 70 | 90 | 56 |
-| 4 | ~85 (heavy slugs) | 115 | 72 |
-| 5 | ~103 (heavy slugs) | 135 | ~86 |
-| 6 | ~120 (heavy slugs) | 155 | ~95 |
+| 1 | 40 | 50 | 32 |
+| 2 | ~50 | 63 | ~40 |
+| 3 | ~62 | 81 | ~51 |
+| 4 | ~77 (heavy slugs) | 104 | ~65 |
+| 5 | ~93 (heavy slugs) | 122 | ~77 |
+| 6 | ~108 (heavy slugs) | 140 | ~85 |
+| 7 | ~123 (heavy slugs) | 158 | ~95 |
+| 8 | ~137 (heavy slugs) | 176 | ~104 |
+| 9 | ~151 (heavy slugs) | 194 | ~113 |
+| 10 | ~168 (heavy slugs) | 216 | ~126 |
 
 Vulcan and Wave have lower peak damage but hit many targets at once. All values are tunable.
 
 ### 5.1 Pickups
 - **Weapon capsule.** Every supply ship (carrier) **always** drops one. There are six per level. It drifts down slowly and **cycles colour (Vulcan → Laser → Wave) every 1.5 s**, so you choose your weapon by when you grab it.
-  - **Every capsule gives +1 power level.** At L6 it gives +5,000 points instead.
-  - If it's a different type from your current weapon, you also switch to that type.
-- **Shield cell** (green S): restores 1 pip. A **2% random drop from any enemy kill**.
-- **Bomb** (B): +1 bomb (maximum 5). A **2% random drop from any enemy kill** (rolled separately from the shield).
+  - **Same type as your current weapon:** +1 power level. At L10 it gives +5,000 points instead.
+  - **Different type:** you switch to that type and **reset to L2**. Timing the colour matters.
+  - Level 1 has 6 supply ships, so a single weapon can reach about **L7** within it. L8–L10 are for later levels.
+- **Shield cell** (green S): restores 1 pip. A **1% random drop from any enemy kill**.
+- **Bomb** (B): +1 bomb (maximum 5). A **1% random drop from any enemy kill**.
+- **Speed** (orange chevrons): ship speed ×1.05, up to the 320 px/s cap. About 15 pickups take you from the starting 160 px/s to the cap. Above the cap it gives +5,000 points. A **5% random drop from any enemy kill**. Speed is kept when you lose a life.
+- Only one random drop is rolled per kill. Supply ships drop their capsule instead.
 - Pickups that scroll off-screen are lost, but **do not** break the chain.
 
 ### 5.2 Bomb

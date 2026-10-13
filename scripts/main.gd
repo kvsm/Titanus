@@ -92,9 +92,10 @@ func _process(delta: float) -> void:
 	if g == null:
 		return
 	if _frames % 600 == 0:
-		print("t=%.0f score=%d chain=%d kills=%d/%d enemies=%d bullets=%d boss=%s fps=%d" % [g.time, g.score.score,
-			g.score.chain, g.score.kills, g.score.spawned, g.enemies.size(), g.bullets.count(),
-			str(g.boss.state) if g.boss else "-", Engine.get_frames_per_second()])
+		print("t=%.0f score=%d chain=%d kills=%d/%d enemies=%d bullets=%d boss=%s weapon=%s L%d speed=%d fps=%d" % [g.time,
+			g.score.score, g.score.chain, g.score.kills, g.score.spawned, g.enemies.size(), g.bullets.count(),
+			str(g.boss.state) if g.boss else "-", g.player.weapon, g.player.level, roundi(g.player.speed),
+			Engine.get_frames_per_second()])
 	if _shots_dir != "" and not _shot_times.is_empty() and g.time >= _shot_times[0]:
 		var img := get_viewport().get_texture().get_image()
 		img.save_png("%s/shot_%03d.png" % [_shots_dir, int(_shot_times[0])])

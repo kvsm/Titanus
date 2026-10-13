@@ -7,7 +7,9 @@ var game: Game
 
 var target := Vector2.ZERO
 var has_target := false
-## Tilt / keyboard steering: when use_drive is set the ship moves at drive * MAX_SPEED.
+## Current top speed: starts at SPEED_BASE, raised by speed power-ups up to SPEED_MAX.
+var speed := Tun.SPEED_BASE
+## Tilt / keyboard steering: when use_drive is set the ship moves at drive * speed.
 var use_drive := false
 var drive := Vector2.ZERO
 
@@ -88,10 +90,10 @@ func _move(dt: float) -> void:
 	if _control_lock > 0.0:
 		# respawn fly-in
 		_control_lock -= dt
-		position = position.move_toward(Vector2(position.x, 400), Tun.MAX_SPEED * 0.6 * dt)
+		position = position.move_toward(Vector2(position.x, 400), Tun.SPEED_MAX * 0.6 * dt)
 		return
 	if use_drive:
-		position += drive.limit_length(1.0) * Tun.MAX_SPEED * dt
+		position += drive.limit_length(1.0) * speed * dt
 		position.x = clampf(position.x, Tun.PLAYER_MARGIN_X, Tun.SCREEN.x - Tun.PLAYER_MARGIN_X)
 		position.y = clampf(position.y, Tun.PLAYER_MIN_Y, Tun.SCREEN.y - 10)
 		return
@@ -101,7 +103,7 @@ func _move(dt: float) -> void:
 	goal.x = clampf(goal.x, Tun.PLAYER_MARGIN_X, Tun.SCREEN.x - Tun.PLAYER_MARGIN_X)
 	goal.y = clampf(goal.y, Tun.PLAYER_MIN_Y, Tun.SCREEN.y - 10)
 	# move_toward never overshoots, so the ship settles exactly on the finger
-	position = position.move_toward(goal, Tun.MAX_SPEED * dt)
+	position = position.move_toward(goal, speed * dt)
 
 
 func _fire(dt: float) -> void:

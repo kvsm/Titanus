@@ -104,6 +104,7 @@ func _draw() -> void:
 	var wi: Texture2D = _icons["cap_" + p.weapon]
 	draw_texture(wi, Vector2(4, h - 26))
 	PixelFont.draw(self, "L%d" % p.level, Vector2(19, h - 21), Tun.WEAPON_COLOR[p.weapon])
+	PixelFont.draw(self, "SPD %d%%" % roundi(p.speed / Tun.SPEED_MAX * 100.0), Vector2(42, h - 21), Tun.C_ORANGE)
 
 	# bottom right: bombs and lives
 	var bt: Texture2D = _icons["icon_bomb"]

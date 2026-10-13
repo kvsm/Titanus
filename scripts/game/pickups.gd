@@ -14,6 +14,7 @@ var items: Array[Item] = []
 var _cap_tex: Array[Texture2D] = []
 var _shield_tex: Texture2D
 var _bomb_tex: Texture2D
+var _speed_tex: Texture2D
 
 
 func _ready() -> void:
@@ -21,6 +22,7 @@ func _ready() -> void:
 		_cap_tex.append(Tun.tex("cap_" + w))
 	_shield_tex = Tun.tex("pick_shield")
 	_bomb_tex = Tun.tex("pick_bomb")
+	_speed_tex = Tun.tex("pick_speed")
 
 
 func spawn(kind: String, at: Vector2) -> void:
@@ -60,18 +62,29 @@ func _collect(it: Item) -> void:
 	var p := game.player
 	match it.kind:
 		"capsule":
-			# every capsule powers up, whether or not it also switches the weapon type
+			# same type: +1 level. Different type: switch and reset to SWITCH_LEVEL.
 			var w: String = Tun.WEAPONS[_weapon_index(it)]
+			if game.autotest_weapon != "":
+				w = game.autotest_weapon # forced-weapon smoke tests level up a single weapon
 			if w != p.weapon:
 				p.weapon = w
-				game.fx.popup(it.pos + Vector2(0, 8), w.to_upper(), Tun.WEAPON_COLOR[w])
-			if p.level < Tun.WEAPON_MAX:
+				p.level = Tun.SWITCH_LEVEL
+				game.fx.popup(it.pos, w.to_upper(), Tun.WEAPON_COLOR[w])
+			elif p.level < Tun.WEAPON_MAX:
 				p.level += 1
 				game.fx.popup(it.pos + Vector2(0, -8), "POWER UP", Tun.WEAPON_COLOR[w])
 			else:
 				game.add_points(Tun.MAXED_CAPSULE_BONUS, it.pos)
 				game.fx.popup(it.pos + Vector2(0, -8), "MAX", Tun.WEAPON_COLOR[w])
 			Audio.play("powerup")
+		"speed":
+			if p.speed < Tun.SPEED_MAX:
+				p.speed = minf(Tun.SPEED_MAX, p.speed * Tun.SPEED_PICKUP)
+				game.fx.popup(it.pos, "SPEED UP", Tun.C_ORANGE)
+			else:
+				game.add_points(Tun.MAXED_CAPSULE_BONUS, it.pos)
+				game.fx.popup(it.pos + Vector2(0, -8), "MAX SPEED", Tun.C_ORANGE)
+			Audio.play("pickup")
 		"shield":
 			p.shield = mini(Tun.SHIELD_MAX, p.shield + 1)
 			game.fx.popup(it.pos, "SHIELD", Tun.C_MINT)
@@ -88,6 +101,7 @@ func _draw() -> void:
 		match it.kind:
 			"capsule": tex = _cap_tex[_weapon_index(it)]
 			"shield": tex = _shield_tex
+			"speed": tex = _speed_tex
 			_: tex = _bomb_tex
 		var at := (it.pos - tex.get_size() / 2.0).round()
 		draw_texture(tex, at)

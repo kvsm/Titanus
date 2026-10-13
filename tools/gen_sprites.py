@@ -577,7 +577,7 @@ def gen_bullets():
     d.rectangle([2, 0, 2, 7], fill=C("w"))
     save(heavy, "sprites", "shot_vulcan_heavy.png")
 
-    for lvl, w in enumerate((12, 16, 20, 26, 30, 34), start=1):
+    for lvl, w in enumerate((12, 16, 20, 26, 30, 34, 36, 38, 40, 42), start=1):
         img = Image.new("RGBA", (w, 7), (0, 0, 0, 0))
         px = img.load()
         for x in range(w):
@@ -604,7 +604,8 @@ def gen_pickups():
                 "L": ["#..", "#..", "#..", "#..", "###"],
                 "W": ["#.#", "#.#", "###", "###", "#.#"],
                 "S": [".##", "#..", ".#.", "..#", "##."],
-                "B": ["##.", "#.#", "##.", "#.#", "##."]}[letter]
+                "B": ["##.", "#.#", "##.", "#.#", "##."],
+                "^": [".#.", "#.#", ".#.", "#.#", "..."]}[letter]
         for y, row in enumerate(mini):
             for x, ch in enumerate(row):
                 if ch == "#":
@@ -616,6 +617,7 @@ def gen_pickups():
     save(capsule("c", "W"), "sprites", "cap_wave.png")
     save(capsule("m", "S"), "sprites", "pick_shield.png")
     save(capsule("6", "B"), "sprites", "pick_bomb.png")
+    save(capsule("7", "^"), "sprites", "pick_speed.png")
 
     bomb = from_ascii([
         "..55",
