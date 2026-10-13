@@ -56,7 +56,17 @@
 - If the steering finger lifts while the second finger is still down, the second finger does **not** take over steering until it is lifted and placed again. This prevents surprise jumps.
 - A 0.5 s cooldown between bombs prevents accidental double-spend.
 
-### 3.4 System
+### 3.4 Alternative scheme: tilt (added in v0.1)
+Chosen with the CONTROLS button on the title screen or in the pause menu.
+
+- **Steering:** "marble" style. Lower the right edge to move right; tip the top away to move up.
+- **Speed:** proportional to the tilt angle from the neutral pose, capped at `max_speed`. A 2.5° deadzone is ignored; full speed comes at 26° / 18° / 12° (sensitivity LOW / MED / HIGH).
+- **Neutral pose:** captured when the level starts and again on every resume from pause.
+- **Smoothing:** sensor readings are low-pass filtered to remove jitter.
+- **Bomb:** with no steering finger, **any tap** (outside the pause button) fires a bomb.
+- **Invert Y:** an option in the pause menu.
+
+### 3.5 System
 - Pause button in the top-right corner (enlarged hit area) and the Android **Back** button both pause.
 - The game auto-pauses when the app loses focus.
 - Vibration on taking a hit, losing a life and bombing (can be turned off in settings).
@@ -233,7 +243,7 @@ Expected fight length is ~40–50 s at weapon level 2–3. There is no timeout.
 - Score popups at the kill location, tinted by multiplier.
 
 ### 10.3 Screen flow (first build)
-**Title** (logo, striped sun, "TAP TO START") → **Level 1** → **Results** → back to Title.
+**Title** (logo, striped sun, START button, CONTROLS toggle) → **Level 1** → **Results** → back to Title.
 **Pause menu:** Resume / Music volume / SFX volume / Vibration on/off / Scanlines on/off / Quit to title.
 Save data (`user://save.cfg`): unlocked levels, best score per level, settings.
 

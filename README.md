@@ -5,12 +5,23 @@ Design: [docs/DESIGN.md](docs/DESIGN.md).
 
 ## Play
 
-- **Steer:** drag one finger; the ship chases it (speed-capped).
-- **Fire:** automatic.
-- **Bomb:** tap with a second finger while steering.
-- **Pause:** top-right button or the Android back button.
+Press **START** on the title screen. The **CONTROLS** button below it switches between two schemes (also in the pause menu):
 
-Desktop testing: the mouse acts as the steering finger. `B`/`Space` bombs, `P`/`Esc` pauses.
+| | Touch | Tilt |
+|---|---|---|
+| Steer | Drag one finger; the ship chases it (speed-capped) | Tilt the phone like rolling a marble: lower the right edge to go right, tip the top away to go up |
+| Bomb | Tap with a second finger | Tap anywhere |
+
+- **Fire:** automatic in both schemes.
+- **Pause:** the top-right button or the Android Back button.
+- **Tilt neutral:** whatever angle you hold the phone at when you press START (or resume from pause) counts as neutral.
+- **Tilt settings** (pause menu): sensitivity (LOW / MED / HIGH) and invert Y.
+
+Desktop testing:
+
+- The mouse acts as the steering finger, and arrow keys / WASD move the ship.
+- `Enter` starts the game and `C` toggles the control scheme on the title screen.
+- `B`/`Space` bombs and `P`/`Esc` pauses.
 
 ## Get the APK
 
@@ -28,7 +39,7 @@ Download it from the run's **Artifacts** (`titanus-debug-apk`). Pushing a `v*` t
 |---|---|
 | Regenerate sprites, font, backgrounds and icons | `python3 tools/gen_sprites.py` (needs Pillow) |
 | Regenerate SFX and music | `python3 tools/gen_audio.py` (needs numpy and ffmpeg with libvorbis) |
-| Smoke test | `godot --headless --fixed-fps 60 -- --autotest` |
+| Smoke test | `godot --headless --fixed-fps 60 -- --autotest [--weapon=vulcan\|laser\|wave] [--controls=tilt]` |
 | Screenshots of a full run | `godot --fixed-fps 60 -- --autotest --shots=/some/dir` |
 
 Where to change things:

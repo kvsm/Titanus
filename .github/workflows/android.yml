@@ -80,6 +80,11 @@ jobs:
             grep -q "AUTOTEST COMPLETE" autotest-$w.log || { echo "::error::autotest with $w did not finish the level"; exit 1; }
             ! grep -E "SCRIPT ERROR|AUTOTEST TIMEOUT" autotest-$w.log || { echo "::error::autotest with $w hit errors"; exit 1; }
           done
+          echo "::group::autotest tilt controls"
+          timeout 600 ~/godot/godot --headless --fixed-fps 60 -- --autotest --controls=tilt 2>&1 | tee autotest-tilt.log
+          echo "::endgroup::"
+          grep -q "AUTOTEST COMPLETE" autotest-tilt.log || { echo "::error::autotest with tilt controls did not finish the level"; exit 1; }
+          ! grep -E "SCRIPT ERROR|AUTOTEST TIMEOUT" autotest-tilt.log || { echo "::error::autotest with tilt controls hit errors"; exit 1; }
 
       - name: Export debug APK
         env:

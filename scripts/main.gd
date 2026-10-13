@@ -2,6 +2,7 @@ extends Node
 ## Screen flow (§10.3): Title -> Level -> Results -> Title.
 ## Command-line user args (after `--`):
 ##   --autotest        start Level 1 immediately with an invulnerable autopilot, quit when it ends
+##   --controls=tilt   with --autotest: steer through the tilt/drive path instead of touch
 ##   --weapon=<name>   with --autotest: play the whole level with vulcan, laser or wave
 ##   --shots=<dir>     with --autotest: save screenshots at fixed times into <dir>
 ##   --screen=results  open the results screen with sample stats (dev preview)
@@ -21,6 +22,8 @@ func _ready() -> void:
 	for a in OS.get_cmdline_user_args():
 		if a == "--autotest":
 			_autotest = true
+		elif a == "--controls=tilt":
+			Save.control_scheme = "tilt"
 		elif a.begins_with("--weapon="):
 			_weapon = a.substr(9)
 		elif a.begins_with("--shots="):

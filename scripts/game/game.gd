@@ -11,6 +11,8 @@ const PAUSE_RECT := Rect2(240, 0, 30, 22)
 var level_index := 1
 var autotest := false
 var autotest_weapon := "" # forces this weapon during autotest
+var control_scheme := "touch" # "touch" (follow the finger) or "tilt"
+var tilt := TiltInput.new()
 
 var bg: Background
 var ground_layer: Node2D
@@ -64,7 +66,7 @@ func _ready() -> void:
 	player = Player.new()
 	player.game = self
 	player.position = Vector2(Tun.SCREEN.x / 2.0, Tun.SCREEN.y + 20)
-	player.set_target(Vector2(Tun.SCREEN.x / 2.0, 400))
+	player.fly_in()
 	add_child(player)
 	bullets = BulletManager.new()
 	bullets.game = self
@@ -85,6 +87,8 @@ func _ready() -> void:
 	ui.add_child(pause_menu)
 	var scan := Scanlines.new()
 	ui.add_child(scan)
+
+	_apply_control_scheme()
 
 	runner = LevelRunner.new()
 	runner.game = self
@@ -107,6 +111,7 @@ func _process(delta: float) -> void:
 		_freeze -= dt
 		return
 	time += dt
+	_update_drive(dt)
 	runner.update(dt)
 	scroll_speed = move_toward(scroll_speed, target_scroll, 20.0 * dt)
 	bg.scroll(scroll_speed * dt, dt)
@@ -139,6 +144,14 @@ func _unhandled_input(event: InputEvent) -> void:
 		if game_over or level_done:
 			if not t.pressed:
 				_on_end_tap()
+			return
+		if control_scheme == "tilt":
+			# tilt steers, so every tap is free: pause button, otherwise bomb
+			if t.pressed:
+				if PAUSE_RECT.has_point(t.position):
+					open_pause()
+				else:
+					player.request_bomb()
 			return
 		if t.pressed:
 			if _steer_index == -1:
@@ -196,6 +209,35 @@ func open_pause() -> void:
 func _on_resume() -> void:
 	paused = false
 	Audio.set_music_paused(false)
+	_apply_control_scheme() # the scheme may have changed in the menu; also re-centres tilt
+
+
+func _apply_control_scheme() -> void:
+	control_scheme = Save.control_scheme
+	_steer_index = -1
+	player.release_target()
+	player.use_drive = control_scheme == "tilt"
+	player.drive = Vector2.ZERO
+	if control_scheme == "tilt":
+		tilt.calibrate() # wherever the phone is held now becomes "neutral"
+
+
+## Tilt steering plus arrow keys / WASD (desktop testing) feed the player's drive vector.
+func _update_drive(dt: float) -> void:
+	if autotest:
+		return # the autopilot steers
+	var keys := Vector2(
+		Input.get_axis(&"ui_left", &"ui_right") + float(Input.is_key_pressed(KEY_D)) - float(Input.is_key_pressed(KEY_A)),
+		Input.get_axis(&"ui_up", &"ui_down") + float(Input.is_key_pressed(KEY_S)) - float(Input.is_key_pressed(KEY_W)))
+	if control_scheme == "tilt":
+		player.drive = tilt.read(dt) + keys
+	elif keys != Vector2.ZERO:
+		player.release_target()
+		player.use_drive = true
+		player.drive = keys
+	elif player.use_drive:
+		player.use_drive = false
+		player.drive = Vector2.ZERO
 
 
 # ------------------------------------------------------------------ world queries
@@ -419,6 +461,9 @@ func _autopilot() -> void:
 	for it in pickups.items:
 		if it.pos.y > 200:
 			goal = it.pos
-	player.set_target(goal)
+	if control_scheme == "tilt":
+		player.drive = ((goal - player.position) / 24.0).limit_length(1.0)
+	else:
+		player.set_target(goal)
 	if autotest_weapon != "":
 		player.weapon = autotest_weapon

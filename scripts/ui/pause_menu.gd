@@ -5,9 +5,10 @@ extends Node2D
 signal resumed
 signal quit
 
-const ROW_H := 30.0
-const TOP := 150.0
-const ROWS := ["resume", "music", "sfx", "vibration", "scanlines", "quit"]
+const ROW_H := 26.0
+const TOP := 92.0
+const ROWS := ["resume", "controls", "tilt_sens", "tilt_invert", "music", "sfx", "vibration", "scanlines", "quit"]
+const SENS_NAMES := ["LOW", "MED", "HIGH"]
 
 
 func open() -> void:
@@ -38,6 +39,12 @@ func handle_touch(t: InputEventScreenTouch) -> void:
 			"resume":
 				resume()
 				return
+			"controls":
+				Save.control_scheme = "tilt" if Save.control_scheme == "touch" else "touch"
+			"tilt_sens":
+				Save.tilt_sensitivity = clampi(Save.tilt_sensitivity + (1 if right_half else -1), 0, 2)
+			"tilt_invert":
+				Save.tilt_invert_y = not Save.tilt_invert_y
 			"music":
 				Save.music_vol = _step(Save.music_vol, right_half)
 				Audio.apply_volumes()
@@ -64,7 +71,7 @@ func _step(v: float, up: bool) -> float:
 
 func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, Tun.SCREEN), Color(Tun.C_MIDNIGHT, 0.8))
-	PixelFont.draw(self, "PAUSED", Vector2(Tun.SCREEN.x / 2.0, 100), Tun.C_PALE, 3, PixelFont.CENTER)
+	PixelFont.draw(self, "PAUSED", Vector2(Tun.SCREEN.x / 2.0, 52), Tun.C_PALE, 3, PixelFont.CENTER)
 	for i in ROWS.size():
 		var r := _row_rect(i)
 		draw_rect(r, Color(Tun.C_DEEP, 0.9))
@@ -73,6 +80,15 @@ func _draw() -> void:
 		var value := ""
 		match ROWS[i]:
 			"resume": label = "RESUME"
+			"controls":
+				label = "CONTROLS"
+				value = Save.control_scheme.to_upper()
+			"tilt_sens":
+				label = "TILT SPEED"
+				value = "< %s >" % SENS_NAMES[Save.tilt_sensitivity]
+			"tilt_invert":
+				label = "TILT INVERT Y"
+				value = "ON" if Save.tilt_invert_y else "OFF"
 			"music":
 				label = "MUSIC"
 				value = "< %3d%% >" % roundi(Save.music_vol * 100)
@@ -92,4 +108,7 @@ func _draw() -> void:
 		else:
 			PixelFont.draw(self, label, Vector2(r.position.x + 8, y), Tun.C_CHROME_L)
 			PixelFont.draw(self, value, Vector2(r.end.x - 8, y), Tun.C_YELLOW, 1, PixelFont.RIGHT)
-	PixelFont.draw(self, "TAP LEFT/RIGHT HALF TO ADJUST", Vector2(Tun.SCREEN.x / 2.0, TOP + ROWS.size() * ROW_H + 8), Tun.C_LAVENDER, 1, PixelFont.CENTER)
+	var hint_y := TOP + ROWS.size() * ROW_H + 6
+	PixelFont.draw(self, "TAP LEFT/RIGHT HALF TO ADJUST", Vector2(Tun.SCREEN.x / 2.0, hint_y), Tun.C_LAVENDER, 1, PixelFont.CENTER)
+	if Save.control_scheme == "tilt":
+		PixelFont.draw(self, "TILT RE-CENTRES ON RESUME", Vector2(Tun.SCREEN.x / 2.0, hint_y + 12), Tun.C_LAVENDER, 1, PixelFont.CENTER)

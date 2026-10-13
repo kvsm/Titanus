@@ -7,6 +7,9 @@ var game: Game
 
 var target := Vector2.ZERO
 var has_target := false
+## Tilt / keyboard steering: when use_drive is set the ship moves at drive * MAX_SPEED.
+var use_drive := false
+var drive := Vector2.ZERO
 
 var weapon := "vulcan"
 var level := 1
@@ -39,6 +42,11 @@ func set_target(p: Vector2) -> void:
 
 func release_target() -> void:
 	has_target = false
+
+
+## Level start: fly up onto the screen before control is handed over.
+func fly_in() -> void:
+	_control_lock = 0.8
 
 
 func request_bomb() -> void:
@@ -81,6 +89,11 @@ func _move(dt: float) -> void:
 		# respawn fly-in
 		_control_lock -= dt
 		position = position.move_toward(Vector2(position.x, 400), Tun.MAX_SPEED * 0.6 * dt)
+		return
+	if use_drive:
+		position += drive.limit_length(1.0) * Tun.MAX_SPEED * dt
+		position.x = clampf(position.x, Tun.PLAYER_MARGIN_X, Tun.SCREEN.x - Tun.PLAYER_MARGIN_X)
+		position.y = clampf(position.y, Tun.PLAYER_MIN_Y, Tun.SCREEN.y - 10)
 		return
 	if not has_target:
 		return
