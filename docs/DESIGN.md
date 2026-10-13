@@ -288,3 +288,16 @@ tools/                   asset generator scripts (Python)
 3. **Capsule colour cycling.** Does it work as the way to choose a weapon, or would fixed-colour drops be better?
 4. **Difficulty.** There's a single difficulty for now. Should we add Easy/Hard later (bullet speed and density scaling)?
 5. **Levels 2–5 themes** (to decide later), e.g. Synth Ocean, Chrome Desert, Orbital Highway, the Titan Forge.
+
+---
+
+## 14. Build status (v0.1, Level 1 prototype)
+
+Level 1 is fully implemented as described above. Known differences from this document:
+
+- **Letterbox:** the bars on phones taller than 9:16 are plain black for now (no scanline/grid frame yet).
+- **Intro:** no mirrored-plaza sun reflection. The striped sun appears on the title screen and as HELIOS's core.
+- **Highway Rush music:** the music does not shift up a gear yet. The section speeds up the scroll and announces itself with a banner.
+- **Audio:** all SFX and music are synthesised placeholders (`tools/gen_audio.py`).
+- **Art:** all sprites are generated placeholders (`tools/gen_sprites.py`).
+

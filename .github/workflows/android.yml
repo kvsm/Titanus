@@ -1,0 +1,103 @@
+name: Android build
+
+on:
+  push:
+    branches: ["**"]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: 4.7.2
+  GODOT_RELEASE: stable
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # to attach the APK to a GitHub release on version tags
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Cache Godot + export templates
+        id: cache-godot
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/godot
+            ~/.local/share/godot/export_templates
+          key: godot-${{ env.GODOT_VERSION }}-${{ env.GODOT_RELEASE }}
+
+      - name: Download Godot + export templates
+        if: steps.cache-godot.outputs.cache-hit != 'true'
+        run: |
+          V="${GODOT_VERSION}-${GODOT_RELEASE}"
+          BASE="https://github.com/godotengine/godot-builds/releases/download/${V}"
+          mkdir -p ~/godot ~/.local/share/godot/export_templates
+          curl -fsSL -o /tmp/godot.zip "${BASE}/Godot_v${V}_linux.x86_64.zip"
+          unzip -q /tmp/godot.zip -d ~/godot
+          mv ~/godot/Godot_v${V}_linux.x86_64 ~/godot/godot
+          curl -fsSL -o /tmp/templates.tpz "${BASE}/Godot_v${V}_export_templates.tpz"
+          unzip -q /tmp/templates.tpz -d /tmp/templates
+          mv /tmp/templates/templates ~/.local/share/godot/export_templates/${GODOT_VERSION}.${GODOT_RELEASE}
+
+      - name: Configure Android export
+        run: |
+          keytool -genkeypair -v -keystore ~/debug.keystore -storepass android -alias androiddebugkey \
+            -keypass android -keyalg RSA -keysize 2048 -validity 10000 \
+            -dname "CN=Android Debug,O=Android,C=US"
+          mkdir -p ~/.config/godot
+          SETTINGS=$(cat <<EOF
+          [gd_resource type="EditorSettings" format=3]
+
+          [resource]
+          export/android/android_sdk_path = "${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
+          export/android/java_sdk_path = "${JAVA_HOME}"
+          export/android/debug_keystore = "${HOME}/debug.keystore"
+          export/android/debug_keystore_user = "androiddebugkey"
+          export/android/debug_keystore_pass = "android"
+          EOF
+          )
+          MINOR="${GODOT_VERSION%.*}"
+          echo "$SETTINGS" > ~/.config/godot/editor_settings-${MINOR}.tres
+          echo "$SETTINGS" > ~/.config/godot/editor_settings-4.tres
+          cat ~/.config/godot/editor_settings-${MINOR}.tres
+
+      - name: Import project
+        run: ~/godot/godot --headless --import 2>&1 | tee import.log; ! grep -E "SCRIPT ERROR|Parse Error" import.log
+
+      - name: Smoke test (autopilot plays the whole level)
+        run: |
+          timeout 600 ~/godot/godot --headless --fixed-fps 60 -- --autotest 2>&1 | tee autotest.log
+          grep -q "AUTOTEST COMPLETE" autotest.log
+          ! grep -E "SCRIPT ERROR" autotest.log
+
+      - name: Export debug APK
+        env:
+          GODOT_ANDROID_KEYSTORE_DEBUG_USER: androiddebugkey
+          GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD: android
+        run: |
+          export GODOT_ANDROID_KEYSTORE_DEBUG_PATH="$HOME/debug.keystore"
+          mkdir -p build
+          ~/godot/godot --headless --export-debug "Android" build/titanus-debug.apk 2>&1 | tee export.log
+          test -s build/titanus-debug.apk
+          ls -la build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: titanus-debug-apk
+          path: build/titanus-debug.apk
+          if-no-files-found: error
+
+      - name: Attach APK to release (version tags)
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1 || gh release create "${GITHUB_REF_NAME}" --title "Titanus ${GITHUB_REF_NAME}" --notes "Debug build"
+          gh release upload "${GITHUB_REF_NAME}" build/titanus-debug.apk --clobber
