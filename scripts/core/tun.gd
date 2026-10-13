@@ -13,7 +13,7 @@ const PLAYER_MARGIN_X := 9.0
 const PLAYER_HITBOX_R := 2.0
 
 # --- tilt controls
-const TILT_DEADZONE := 2.5 # degrees from the neutral pose that are ignored
+const TILT_DEADZONE := 0.75 # degrees from the neutral pose that are ignored
 const TILT_FULL_ANGLE: Array[float] = [26.0, 18.0, 12.0] # degrees for full speed (LOW / MED / HIGH sensitivity)
 const TILT_SMOOTHING := 14.0 # low-pass filter rate; higher = snappier but jittery
 

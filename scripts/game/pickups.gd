@@ -60,17 +60,17 @@ func _collect(it: Item) -> void:
 	var p := game.player
 	match it.kind:
 		"capsule":
+			# every capsule powers up, whether or not it also switches the weapon type
 			var w: String = Tun.WEAPONS[_weapon_index(it)]
-			if w == p.weapon:
-				if p.level < Tun.WEAPON_MAX:
-					p.level += 1
-					game.fx.popup(it.pos, "POWER UP", Tun.WEAPON_COLOR[w])
-				else:
-					game.add_points(Tun.MAXED_CAPSULE_BONUS, it.pos)
-					game.fx.popup(it.pos + Vector2(0, -8), "MAX", Tun.WEAPON_COLOR[w])
-			else:
+			if w != p.weapon:
 				p.weapon = w
-				game.fx.popup(it.pos, w.to_upper(), Tun.WEAPON_COLOR[w])
+				game.fx.popup(it.pos + Vector2(0, 8), w.to_upper(), Tun.WEAPON_COLOR[w])
+			if p.level < Tun.WEAPON_MAX:
+				p.level += 1
+				game.fx.popup(it.pos + Vector2(0, -8), "POWER UP", Tun.WEAPON_COLOR[w])
+			else:
+				game.add_points(Tun.MAXED_CAPSULE_BONUS, it.pos)
+				game.fx.popup(it.pos + Vector2(0, -8), "MAX", Tun.WEAPON_COLOR[w])
 			Audio.play("powerup")
 		"shield":
 			p.shield = mini(Tun.SHIELD_MAX, p.shield + 1)

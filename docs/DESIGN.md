@@ -60,7 +60,7 @@
 Chosen with the CONTROLS button on the title screen or in the pause menu.
 
 - **Steering:** "marble" style. Lower the right edge to move right; tip the top away to move up.
-- **Speed:** proportional to the tilt angle from the neutral pose, capped at `max_speed`. A 2.5° deadzone is ignored; full speed comes at 26° / 18° / 12° (sensitivity LOW / MED / HIGH).
+- **Speed:** proportional to the tilt angle from the neutral pose, capped at `max_speed`. A 0.75° deadzone is ignored; full speed comes at 26° / 18° / 12° (sensitivity LOW / MED / HIGH).
 - **Neutral pose:** captured when the level starts and again on every resume from pause.
 - **Smoothing:** sensor readings are low-pass filtered to remove jitter.
 - **Bomb:** with no steering finger, **any tap** (outside the pause button) fires a bomb.
@@ -114,8 +114,8 @@ Vulcan and Wave have lower peak damage but hit many targets at once. All values 
 
 ### 5.1 Pickups
 - **Weapon capsule.** Dropped by carrier enemies. It drifts down slowly and **cycles colour (Vulcan → Laser → Wave) every 1.5 s**, so you choose your weapon by when you grab it.
-  - Same type as current → +1 power level (at L4 it gives +5,000 points instead).
-  - Different type → switch to that type, **keeping your power level**.
+  - **Every capsule gives +1 power level.** At L4 it gives +5,000 points instead.
+  - If it's a different type from your current weapon, you also switch to that type.
 - **Shield cell** (green +): restores 1 pip. Rare.
 - **Bomb** (B): +1 bomb (maximum 5). Rare.
 - Pickups that scroll off-screen are lost, but **do not** break the chain.
