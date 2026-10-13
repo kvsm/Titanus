@@ -47,7 +47,7 @@ const BULLET_CASH := 100
 const CAPSULE_CYCLE := 1.5
 const PICKUP_FALL := 28.0
 const PICKUP_RADIUS := 14.0
-const WEAPON_MAX := 4
+const WEAPON_MAX := 6
 const WEAPONS: Array[String] = ["vulcan", "laser", "wave"]
 
 # --- weapons (§5). Streams are [x offset, angle in degrees from straight up].
@@ -57,15 +57,21 @@ const VULCAN := [
 	{"interval": 0.075, "dmg": 1.3, "streams": [[-6, -8], [-2, 0], [2, 0], [6, 8]]},
 	{"interval": 0.075, "dmg": 1.35, "streams": [[-8, -14], [-4, -6], [0, 0], [4, 6], [8, 14]],
 		"side": [[-6, -35], [6, 35]]},
+	{"interval": 0.07, "dmg": 1.35, "streams": [[-10, -18], [-6, -9], [-2, -2], [2, 2], [6, 9], [10, 18]],
+		"side": [[-6, -35], [6, 35]]},
+	{"interval": 0.065, "dmg": 1.35, "streams": [[-12, -22], [-8, -12], [-4, -4], [0, 0], [4, 4], [8, 12], [12, 22]],
+		"side": [[-6, -35], [6, 35], [-6, -55], [6, 55]]},
 ]
 const VULCAN_SPEED := 520.0
-const LASER_WIDTH: Array[float] = [4.0, 6.0, 8.0, 12.0]
-const LASER_DPS: Array[float] = [50.0, 70.0, 90.0, 115.0]
+const LASER_WIDTH: Array[float] = [4.0, 6.0, 8.0, 12.0, 15.0, 18.0]
+const LASER_DPS: Array[float] = [50.0, 70.0, 90.0, 115.0, 135.0, 155.0]
 const WAVE := [
 	{"interval": 0.22, "dmg": 7.8, "angles": [0]},
 	{"interval": 0.22, "dmg": 10.8, "angles": [0]},
 	{"interval": 0.22, "dmg": 13.8, "angles": [-14, 0, 14]},
 	{"interval": 0.22, "dmg": 17.8, "angles": [-16, 0, 16]},
+	{"interval": 0.2, "dmg": 19.0, "angles": [-16, 0, 16]},
+	{"interval": 0.2, "dmg": 21.0, "angles": [-26, -13, 0, 13, 26]},
 ]
 const WAVE_SPEED := 300.0
 
@@ -79,11 +85,18 @@ const ENEMIES := {
 	"carrier": {"hp": 70.0, "half": Vector2(15, 13), "score": 2000, "tex": "carrier"},
 	"subwoofer": {"hp": 450.0, "half": Vector2(21, 21), "score": 10000, "tex": "subwoofer"},
 	"note": {"hp": 4.0, "half": Vector2(4, 4), "score": 150, "tex": "note"},
+	# stronger late-level enemies
+	"prism": {"hp": 40.0, "half": Vector2(10, 11), "score": 1500, "tex": "prism"},
+	"equalizer": {"hp": 110.0, "half": Vector2(21, 11), "score": 3000, "tex": "equalizer"},
 }
 
+# random pickup drops from any enemy kill (each rolled independently)
+const DROP_CHANCE := {"shield": 0.02, "bomb": 0.02}
+const SPLIT_TIME := 0.9 # PRISM shards burst after this many seconds
+
 # enemy bullet kinds: radius used for collision
-enum B { PINK, ORANGE, BIG, VIOLET }
-const BULLET_R: Array[float] = [2.5, 2.5, 4.0, 2.5]
+enum B { PINK, ORANGE, BIG, VIOLET, SHARD }
+const BULLET_R: Array[float] = [2.5, 2.5, 4.0, 2.5, 4.0]
 
 # --- boss HELIOS (§9)
 const HELIOS_ARM_HP := 350.0

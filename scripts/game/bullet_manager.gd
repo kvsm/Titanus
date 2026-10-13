@@ -7,13 +7,14 @@ var game: Game
 var pos := PackedVector2Array()
 var vel := PackedVector2Array()
 var kind := PackedInt32Array()
+var age := PackedFloat32Array()
 
 var _tex: Array[Texture2D] = []
 var _half: Array[Vector2] = []
 
 
 func _ready() -> void:
-	for n: String in ["b_pink", "b_orange", "b_big", "b_violet"]:
+	for n: String in ["b_pink", "b_orange", "b_big", "b_violet", "b_prism"]:
 		var t := Tun.tex(n)
 		_tex.append(t)
 		_half.append((t.get_size() / 2.0).floor())
@@ -27,6 +28,7 @@ func fire(from: Vector2, angle: float, speed: float, k: int = Tun.B.PINK) -> voi
 	pos.append(from)
 	vel.append(Vector2.from_angle(angle) * speed)
 	kind.append(k)
+	age.append(0.0)
 
 
 func fan(from: Vector2, center_angle: float, n: int, spread_deg: float, speed: float, k: int = Tun.B.PINK) -> void:
@@ -55,10 +57,17 @@ func update(dt: float) -> void:
 	var player := game.player
 	var can_hit := player.can_be_hit()
 	var pp := player.position
+	var splits: Array[Vector2] = []
 	var i := 0
 	while i < pos.size():
 		var p := pos[i] + vel[i] * dt
 		pos[i] = p
+		age[i] += dt
+		if kind[i] == Tun.B.SHARD and age[i] >= Tun.SPLIT_TIME:
+			# PRISM shard bursts into a ring of small bullets
+			splits.append(p)
+			_remove(i)
+			continue
 		if p.x < -16 or p.x > Tun.SCREEN.x + 16 or p.y < -16 or p.y > Tun.SCREEN.y + 16:
 			_remove(i)
 			continue
@@ -70,6 +79,9 @@ func update(dt: float) -> void:
 				can_hit = player.can_be_hit()
 				continue
 		i += 1
+	for s in splits:
+		game.fx.spark(s, Tun.C_CYAN, 3)
+		ring(s, 6, 70.0, Tun.B.VIOLET, randf() * TAU)
 	queue_redraw()
 
 
@@ -78,9 +90,11 @@ func _remove(i: int) -> void:
 	pos[i] = pos[last]
 	vel[i] = vel[last]
 	kind[i] = kind[last]
+	age[i] = age[last]
 	pos.resize(last)
 	vel.resize(last)
 	kind.resize(last)
+	age.resize(last)
 
 
 ## Cancels bullets within `radius` of `center` (all bullets if radius < 0). Returns how many.

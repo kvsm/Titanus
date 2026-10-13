@@ -20,7 +20,7 @@ var _wave_tex: Array[Texture2D] = []
 
 func _ready() -> void:
 	_vulcan_tex = Tun.tex("shot_vulcan")
-	for l in range(1, 5):
+	for l in range(1, Tun.WEAPON_MAX + 1):
 		_wave_tex.append(Tun.tex("shot_wave_%d" % l))
 
 

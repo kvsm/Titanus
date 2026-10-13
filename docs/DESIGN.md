@@ -93,11 +93,11 @@ Chosen with the CONTROLS button on the title screen or in the pause menu.
 
 ## 5. Weapons
 
-Three weapon types. Each one has **power levels 1–4**.
+Three weapon types. Each one has **power levels 1–6**.
 
 | Type | Colour | Role | Description |
 |---|---|---|---|
-| **Vulcan** | Sun-yellow / orange | Coverage | Rapid small bullets. Its spread widens with level: L1 twin stream → L4 five streams in a fan plus angled side shots. |
+| **Vulcan** | Sun-yellow / orange | Coverage | Rapid small bullets. Its spread widens with level: L1 twin stream → L6 seven streams in a fan plus two pairs of angled side shots. |
 | **Laser** | Hot pink | Single-target | A continuous piercing beam straight up. Width 4 / 6 / 8 / 12 px. Highest damage per second, but you have to line up. |
 | **Wave** | Cyan | Crowd control | Expanding sine-wave crescents that pierce. Wide arc, slower rate of fire, lower damage per hit. |
 
@@ -109,15 +109,17 @@ Three weapon types. Each one has **power levels 1–4**.
 | 2 | 55 | 70 | 48 |
 | 3 | 70 | 90 | 62 |
 | 4 | 90 | 115 | 80 |
+| 5 | ~105 | 135 | ~95 |
+| 6 | ~120 | 155 | ~105 |
 
 Vulcan and Wave have lower peak damage but hit many targets at once. All values are tunable.
 
 ### 5.1 Pickups
-- **Weapon capsule.** Dropped by carrier enemies. It drifts down slowly and **cycles colour (Vulcan → Laser → Wave) every 1.5 s**, so you choose your weapon by when you grab it.
-  - **Every capsule gives +1 power level.** At L4 it gives +5,000 points instead.
+- **Weapon capsule.** Every supply ship (carrier) **always** drops one. There are six per level. It drifts down slowly and **cycles colour (Vulcan → Laser → Wave) every 1.5 s**, so you choose your weapon by when you grab it.
+  - **Every capsule gives +1 power level.** At L6 it gives +5,000 points instead.
   - If it's a different type from your current weapon, you also switch to that type.
-- **Shield cell** (green +): restores 1 pip. Rare.
-- **Bomb** (B): +1 bomb (maximum 5). Rare.
+- **Shield cell** (green S): restores 1 pip. A **2% random drop from any enemy kill**.
+- **Bomb** (B): +1 bomb (maximum 5). A **2% random drop from any enemy kill** (rolled separately from the shield).
 - Pickups that scroll off-screen are lost, but **do not** break the chain.
 
 ### 5.2 Bomb
@@ -182,10 +184,10 @@ Base scroll speed: 30 px/s, speeding up to 60 px/s during the Highway Rush secti
 | Time | Section | What happens |
 |---|---|---|
 | 0:00–0:06 | **Intro** | The ship flies up from the bottom. "STAGE 1 — NEON DRIVE" in chrome text. The sun reflects in the plaza. No enemies. |
-| 0:06–0:40 | **A. Outskirts** | Teaches movement and the chain. Glitch drone V-formations from the top and sides. First Strobe divers at 0:20. **First weapon carrier at 0:25** (it drops a capsule). |
-| 0:40–1:15 | **B. Downtown** | Rooftop turrets appear (they scroll with the city, so you have to kill them before they reach the bottom). Hover cars cross in lanes. A second carrier at 1:00. Density goes up. |
+| 0:06–0:40 | **A. Outskirts** | Teaches movement and the chain. Glitch drone V-formations from the top and sides. First Strobe divers at 0:20. Weapon carriers at 0:14 and 0:27. |
+| 0:40–1:15 | **B. Downtown** | Rooftop turrets appear (they scroll with the city, so you have to kill them before they reach the bottom). Hover cars cross in lanes. Carriers at 0:45 and 1:00. **PRISMs appear from 0:55.** Density goes up. |
 | 1:15–1:35 | **Mid-boss: SUBWOOFER** | An armoured tank rolls down the highway, firing beat-synced rings. The scroll slows while it's alive. |
-| 1:35–2:00 | **C. Highway Rush** | The scroll speeds up and the music shifts up a gear. Fast mixed waves: hover-car convoys and Strobe divers. Shield and bomb pickups appear here. |
+| 1:35–2:00 | **C. Highway Rush** | The scroll speeds up and the music shifts up a gear. Fast mixed waves: hover-car convoys and Strobe divers. **EQUALIZERs appear** (1:21, 1:31), along with more PRISMs. Carriers at 1:25 and 1:36. |
 | 2:00–2:06 | **Warning** | The screen tints red. "⚠ WARNING — TITAN APPROACHING ⚠" over a siren synth. Remaining bullets fade out. |
 | 2:06–~2:45 | **Boss: HELIOS** | See §9. |
 | End | **Results** | Score tally, then the rank. |
@@ -203,6 +205,8 @@ The level is data-driven (a timeline file listing time, enemy type, formation, p
 | **Rooftop turret** | 16×16 (ground) | 18 | 500 | Fixed to the city layer and scrolls with it | Aimed 3-shot burst every 2 s, telegraphed by a muzzle glow |
 | **Hover car** | 20×12 | 12 | 400 | Crosses horizontally in lanes, leaves a light trail; slows mid-screen | Drops a 3-way downward fan mid-crossing |
 | **Carrier "Bassline"** (gunship) | 32×28 | 70 | 2,000 | Slow descent to the upper third, strafes, leaves after 8 s | Rotating 6-way rings; **drops a weapon capsule** |
+| **PRISM** (crystal gunship, late) | 22×24 | 40 | 1,500 | Descends, hovers with a slow sway, retreats after 3 volleys | Telegraphed glow, then 3 slow crystal shards that **burst into 6-bullet rings** after 0.9 s |
+| **EQUALIZER** (heavy gunship, late) | 46×26 | 110 | 3,000 | Slow descent, wide sway, leaves after 9 s | Fan-shaped curtain from its five EQ bars, firing for 1.4 s in every 2.2 s. **A two-bar gap walks across the curtain**, and that's where you dodge. |
 | **Mid-boss SUBWOOFER** (tank) | 48×48 | 450 | 10,000 | Rolls down the highway, stops, pulses | Expanding 16-bullet rings **on the music's beat**, with aimed shots between them |
 
 Escape rule: enemies that leave (Strobe retreating, carrier leaving, hover cars exiting) must have enough time on screen to be killed, and leaving breaks the chain.

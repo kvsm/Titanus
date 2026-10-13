@@ -286,7 +286,7 @@ func spawn_boss() -> void:
 func on_enemy_killed(e: Enemy) -> void:
 	var pts := score.kill(e.score_value)
 	fx.popup(e.global_position, str(pts), _popup_color())
-	var big := e.kind in ["carrier", "subwoofer"]
+	var big := e.kind in ["carrier", "subwoofer", "prism", "equalizer"]
 	fx.explode(e.global_position, 3 if e.kind == "subwoofer" else (2 if big else 1))
 	Audio.play("explode_big" if big else "explode_small")
 	if big:
@@ -294,6 +294,11 @@ func on_enemy_killed(e: Enemy) -> void:
 		_freeze = 0.05
 	if e.drop != "":
 		pickups.spawn(e.drop, e.global_position)
+	else:
+		for kind: String in Tun.DROP_CHANCE:
+			if randf() < float(Tun.DROP_CHANCE[kind]):
+				pickups.spawn(kind, e.global_position)
+				break
 	remove_enemy(e, true)
 
 

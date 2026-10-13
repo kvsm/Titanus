@@ -388,6 +388,58 @@ def gen_subwoofer():
     save(outline(img), "sprites", "subwoofer.png")
 
 
+def gen_prism():
+    """PRISM: a faceted crystal gunship (points down, towards the player)."""
+    W, H = 22, 24
+    img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    cx = W // 2
+    top, mid, bot = 0, 9, H - 1
+    # four facets of a diamond, lit from the top-left
+    d.polygon([(cx, top), (0, mid), (cx, mid)], fill=C("l"))
+    d.polygon([(cx, top), (W - 1, mid), (cx, mid)], fill=C("4"))
+    d.polygon([(0, mid), (cx, bot), (cx, mid)], fill=C("c"))
+    d.polygon([(W - 1, mid), (cx, bot), (cx, mid)], fill=C("3"))
+    d.line([(cx, top), (cx, bot)], fill=C("w"))
+    d.line([(0, mid), (W - 1, mid)], fill=C("6"))
+    # glowing core where the shards form
+    d.rectangle([cx - 2, mid + 2, cx + 1, mid + 5], fill=C("w"))
+    d.point((cx - 1, mid + 3), fill=C("c"))
+    # side fins
+    d.polygon([(1, mid - 3), (-1, mid + 6), (3, mid + 2)], fill=C("2"))
+    d.polygon([(W - 2, mid - 3), (W, mid + 6), (W - 4, mid + 2)], fill=C("2"))
+    save(outline(img), "sprites", "prism.png")
+
+
+def gen_equalizer():
+    """EQUALIZER: a wide heavy gunship whose five EQ bars are its emitters."""
+    W, H = 46, 26
+    img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    # hull
+    d.polygon([(4, 2), (W - 5, 2), (W - 1, 10), (W - 6, 21), (5, 21), (0, 10)], fill=C("d"))
+    d.polygon([(6, 3), (W - 7, 3), (W - 3, 10), (W - 8, 19), (7, 19), (2, 10)], fill=C("1"))
+    d.line([(6, 3), (W - 7, 3)], fill=C("g"))
+    # the EQ bars: heights vary, colours run mint -> yellow -> pink from bottom to top
+    heights = [7, 11, 14, 10, 6]
+    grad = ["m", "m", "8", "8", "7", "5", "5", "6", "6", "6", "6", "6", "6", "6"]
+    for i, h in enumerate(heights):
+        x0 = 9 + i * 6
+        for k in range(h):
+            y = 18 - k
+            d.line([(x0, y), (x0 + 3, y)], fill=C(grad[k]))
+        d.line([(x0, 19 - h), (x0 + 3, 19 - h)], fill=C("w"))
+    # emitter nozzles under each bar
+    for i in range(5):
+        x0 = 9 + i * 6
+        d.rectangle([x0 + 1, 21, x0 + 2, 24], fill=C("g"))
+        img.putpixel((x0 + 1, 24), C("5"))
+    # wing lights
+    img.putpixel((2, 10), C("5"))
+    img.putpixel((W - 3, 10), C("5"))
+    save(outline(img), "sprites", "equalizer.png")
+
+
 # ---------------------------------------------------------------- boss: HELIOS
 
 def gen_helios():
@@ -509,6 +561,7 @@ def gen_bullets():
     save(ball(6, "w", "7"), "sprites", "b_orange.png")
     save(ball(10, "w", "5", "6"), "sprites", "b_big.png")
     save(ball(6, "w", "4"), "sprites", "b_violet.png")
+    save(ball(10, "w", "c", "3"), "sprites", "b_prism.png")
 
     vul = Image.new("RGBA", (3, 8), (0, 0, 0, 0))
     d = ImageDraw.Draw(vul)
@@ -516,7 +569,7 @@ def gen_bullets():
     d.rectangle([1, 0, 1, 5], fill=C("9"))
     save(vul, "sprites", "shot_vulcan.png")
 
-    for lvl, w in enumerate((12, 16, 20, 26), start=1):
+    for lvl, w in enumerate((12, 16, 20, 26, 30, 34), start=1):
         img = Image.new("RGBA", (w, 7), (0, 0, 0, 0))
         px = img.load()
         for x in range(w):
@@ -811,6 +864,8 @@ if __name__ == "__main__":
     gen_turret()
     gen_car()
     gen_carrier()
+    gen_prism()
+    gen_equalizer()
     gen_subwoofer()
     gen_helios()
     gen_bullets()

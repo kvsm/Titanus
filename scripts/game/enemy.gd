@@ -69,8 +69,15 @@ func setup(k: String, p: Dictionary, g: Game) -> void:
 		"carrier":
 			position = Vector2(float(p.get("x", 135.0)), -20)
 			_home_x = position.x
-			if drop == "":
-				drop = "capsule"
+			drop = "capsule" # supply ships always carry a weapon capsule
+		"prism":
+			position = Vector2(float(p.get("x", 135.0)), -16)
+			_home_x = position.x
+			_fire_t = 0.8
+			_shots_left = 3 # volleys before it retreats
+		"equalizer":
+			position = Vector2(float(p.get("x", 135.0)), -20)
+			_home_x = position.x
 		"subwoofer":
 			position = Vector2(135, -30)
 		"note":
@@ -87,6 +94,8 @@ func update(dt: float) -> void:
 		"turret": _update_turret(dt)
 		"car": _update_car(dt)
 		"carrier": _update_carrier(dt)
+		"prism": _update_prism(dt)
+		"equalizer": _update_equalizer(dt)
 		"subwoofer": _update_subwoofer(dt)
 		"note": _update_note(dt)
 	if dead:
@@ -235,6 +244,68 @@ func _update_carrier(dt: float) -> void:
 			position += _vel * dt
 
 
+## PRISM: hovers and lobs slow crystal shards that burst into rings (Tun.SPLIT_TIME).
+func _update_prism(dt: float) -> void:
+	var target_y := float(params.get("y", 110.0))
+	match _state:
+		0:
+			position.y += maxf(30.0, (target_y - position.y) * 2.0) * dt
+			if position.y >= target_y - 1.0:
+				_state = 1
+				_timer = 0.0
+		1:
+			_timer += dt
+			position.x = _home_x + sin(_timer * 1.2) * 18.0
+			_fire_t -= dt
+			_glow = clampf(1.0 - _fire_t / 0.5, 0.0, 1.0) if _fire_t < 0.5 else 0.0
+			if _fire_t <= 0.0:
+				_fire_t = 1.7
+				if _can_fire():
+					var from := position + Vector2(0, 6)
+					game.bullets.fan(from, game.bullets.aim(from), 3, 50.0, 55.0, Tun.B.SHARD)
+					Audio.play("enemy_shot", 0.0, 0.7)
+				_shots_left -= 1
+				if _shots_left <= 0:
+					_state = 2
+		2:
+			_vel.y = maxf(_vel.y - 120.0 * dt, -110.0)
+			position += _vel * dt
+
+
+## EQUALIZER: sweeps a fan-shaped curtain of bullets from its five EQ bars,
+## always leaving a two-bar gap that walks across the pattern.
+func _update_equalizer(dt: float) -> void:
+	var target_y := float(params.get("y", 72.0))
+	match _state:
+		0:
+			position.y += maxf(18.0, (target_y - position.y) * 1.2) * dt
+			if position.y >= target_y - 1.0:
+				_state = 1
+				_timer = 0.0
+		1:
+			_timer += dt
+			position.x = _home_x + sin(_timer * 0.7) * 40.0
+			var cycle := fmod(_timer, 2.2)
+			_glow = 1.0 if cycle < 1.4 else 0.0
+			if cycle < 1.4:
+				_fire_t -= dt
+				if _fire_t <= 0.0:
+					_fire_t = 0.14
+					if _can_fire():
+						var gap := int(_timer / 0.7) % 5
+						for i in 5:
+							if i == gap or i == (gap + 1) % 5:
+								continue
+							var from := position + Vector2((i - 2) * 6.0 - 0.5, 12)
+							game.bullets.fire(from, deg_to_rad(90.0 + (i - 2) * 14.0), 110.0, Tun.B.PINK)
+						Audio.play("enemy_shot", -6.0, 1.3)
+			if _timer >= 9.0:
+				_state = 2
+		2:
+			_vel.y = maxf(_vel.y - 50.0 * dt, -80.0)
+			position += _vel * dt
+
+
 func _update_subwoofer(dt: float) -> void:
 	_pulse = maxf(0.0, _pulse - dt * 4.0)
 	match _state:
@@ -310,6 +381,15 @@ func _draw() -> void:
 			draw_set_transform(Vector2.ZERO, 0.0, Vector2(s, s))
 			draw_texture(_tex, -_tex.get_size() / 2.0, mod)
 			draw_set_transform(Vector2.ZERO)
+		"prism":
+			draw_texture(_tex, -_tex.get_size() / 2.0, mod)
+			if _glow > 0.0:
+				draw_circle(Vector2(0, 2), 1.5 + _glow * 3.0, Color(Tun.C_CYAN, 0.4 + _glow * 0.5))
+		"equalizer":
+			draw_texture(_tex, -_tex.get_size() / 2.0, mod)
+			if _glow > 0.0 and int(_t * 12.0) % 2 == 0:
+				for i in 5:
+					draw_rect(Rect2((i - 2) * 6.0 - 1.5, 12, 2, 2), Tun.C_PALE)
 		"glitch", "note":
 			var bob := Vector2(0, roundf(sin(_t * 8.0)))
 			draw_texture(_tex, -_tex.get_size() / 2.0 + bob, mod)
