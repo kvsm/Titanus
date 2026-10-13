@@ -2,12 +2,14 @@ extends Node
 ## Screen flow (§10.3): Title -> Level -> Results -> Title.
 ## Command-line user args (after `--`):
 ##   --autotest        start Level 1 immediately with an invulnerable autopilot, quit when it ends
+##   --weapon=<name>   with --autotest: play the whole level with vulcan, laser or wave
 ##   --shots=<dir>     with --autotest: save screenshots at fixed times into <dir>
 ##   --screen=results  open the results screen with sample stats (dev preview)
 ##   --snap=<file>     save a screenshot after 2.5 s and quit (dev preview)
 
 var current: Node
 var _autotest := false
+var _weapon := ""
 var _shots_dir := ""
 var _shot_times: Array[float] = [3.0, 20.0, 45.0, 62.0, 90.0, 118.0, 135.0, 150.0, 165.0]
 var _frames := 0
@@ -19,6 +21,8 @@ func _ready() -> void:
 	for a in OS.get_cmdline_user_args():
 		if a == "--autotest":
 			_autotest = true
+		elif a.begins_with("--weapon="):
+			_weapon = a.substr(9)
 		elif a.begins_with("--shots="):
 			_shots_dir = a.substr(8)
 		elif a.begins_with("--snap="):
@@ -54,6 +58,7 @@ func start_level(n: int) -> void:
 	var g := Game.new()
 	g.level_index = n
 	g.autotest = _autotest
+	g.autotest_weapon = _weapon
 	g.finished.connect(_on_level_finished)
 	g.retry.connect(start_level.bind(n))
 	g.quit_to_title.connect(goto_title)

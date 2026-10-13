@@ -71,11 +71,15 @@ jobs:
       - name: Import project
         run: ~/godot/godot --headless --import 2>&1 | tee import.log; ! grep -E "SCRIPT ERROR|Parse Error" import.log
 
-      - name: Smoke test (autopilot plays the whole level)
+      - name: Smoke test (autopilot plays the whole level with each weapon)
         run: |
-          timeout 600 ~/godot/godot --headless --fixed-fps 60 -- --autotest 2>&1 | tee autotest.log
-          grep -q "AUTOTEST COMPLETE" autotest.log
-          ! grep -E "SCRIPT ERROR" autotest.log
+          for w in vulcan laser wave; do
+            echo "::group::autotest $w"
+            timeout 600 ~/godot/godot --headless --fixed-fps 60 -- --autotest --weapon=$w 2>&1 | tee autotest-$w.log
+            echo "::endgroup::"
+            grep -q "AUTOTEST COMPLETE" autotest-$w.log || { echo "::error::autotest with $w did not finish the level"; exit 1; }
+            ! grep -E "SCRIPT ERROR|AUTOTEST TIMEOUT" autotest-$w.log || { echo "::error::autotest with $w hit errors"; exit 1; }
+          done
 
       - name: Export debug APK
         env:

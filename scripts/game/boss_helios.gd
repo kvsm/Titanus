@@ -100,8 +100,10 @@ func hp_fraction() -> float:
 
 
 ## True if a player shot at `p` hits armour (and is absorbed).
+## Once the chest is open the armour stops absorbing shots: they travel up the screen,
+## so the waist would otherwise shield the core from non-piercing weapons (Vulcan).
 func blocks(p: Vector2) -> bool:
-	if state == ENTER or state == DONE:
+	if state == ENTER or state == DONE or core.targetable:
 		return false
 	var d := p - position
 	return absf(d.x) < BODY_HALF.x and d.y > -BODY_HALF.y - 8 and d.y < BODY_HALF.y

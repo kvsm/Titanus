@@ -10,6 +10,7 @@ const PAUSE_RECT := Rect2(240, 0, 30, 22)
 
 var level_index := 1
 var autotest := false
+var autotest_weapon := "" # forces this weapon during autotest
 
 var bg: Background
 var ground_layer: Node2D
@@ -419,3 +420,5 @@ func _autopilot() -> void:
 		if it.pos.y > 200:
 			goal = it.pos
 	player.set_target(goal)
+	if autotest_weapon != "":
+		player.weapon = autotest_weapon
