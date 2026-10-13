@@ -1,6 +1,6 @@
-# TITANS — Game Design Document (v0.1)
+# TITANUS — Game Design Document (v0.1)
 
-> Working title. Vertical-scrolling shoot-'em-up for Android.
+> Vertical-scrolling shoot-'em-up for Android.
 > Colourful retro pixel art, synthwave aesthetic.
 > Scope of this version: **one playable level** (Level 1) to tune the design before building the other four.
 
@@ -25,7 +25,7 @@
 | Internal resolution | **270 × 480** (9:16). Rendered to a viewport and scaled up with nearest-neighbour filtering. |
 | Scaling | `stretch_mode = viewport`, `aspect = keep`. On taller phones the extra space is a letterbox filled with a dark scanline/grid frame, so the playfield is identical on every device (fair difficulty). |
 | Target | Android, minSdk = Godot default (24) |
-| Package id | `com.kvsm.titans` |
+| Package id | `com.kvsm.titanus` |
 | Build | GitHub Actions: headless Godot export → debug-signed APK uploaded as a workflow artifact on every push. Release signing comes later. |
 | Frame rate | 60 fps target. All tuning values are per second, so the game is frame-rate independent. |
 
