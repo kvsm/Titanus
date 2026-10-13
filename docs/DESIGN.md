@@ -84,7 +84,7 @@ Chosen with the CONTROLS button on the title screen or in the pause menu.
 | Shield | **4 pips**. Each enemy bullet or collision removes 1 pip. |
 | Pip lost | 1.5 s invulnerability (ship blinks), all bullets within 40 px are cancelled, short screen shake |
 | Shield at 0 | The next hit costs a **life** (explosion, respawn from the bottom of the screen, 2.5 s invulnerability, full shield) |
-| Lives | **3** to start. Extra lives at 200k and 500k points. |
+| Lives | **3** to start. Extra lives at 500k points, then every 1M after that (1.5M, 2.5M, ...). |
 | Weapon on death | Weapon type kept, **power level −1** (minimum 1) |
 | Bombs on death | Reset to 2 if below 2 |
 | Game over | Back to the **start of the current level**. Beaten levels stay unlocked. |

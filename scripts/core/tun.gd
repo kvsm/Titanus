@@ -24,7 +24,8 @@ const INVULN_HIT := 1.5
 const INVULN_RESPAWN := 2.5
 const HIT_CANCEL_RADIUS := 40.0
 const RESPAWN_DELAY := 1.6
-const EXTENDS: Array[int] = [200000, 500000]
+const EXTEND_FIRST := 500000 # first extra life
+const EXTEND_EVERY := 1000000 # then one more every this many points (1.5M, 2.5M, ...)
 
 # --- bombs (§5.2)
 const BOMBS_START := 2

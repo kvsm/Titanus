@@ -38,7 +38,7 @@ var _camera: Camera2D
 var _shake := 0.0
 var _freeze := 0.0
 var _steer_index := -1
-var _next_extend := 0
+var _next_extend := Tun.EXTEND_FIRST # score that awards the next extra life
 var game_over := false
 var game_over_t := 0.0
 var level_done := false
@@ -400,8 +400,8 @@ func _check_body_collisions() -> void:
 
 
 func _check_extends() -> void:
-	if _next_extend < Tun.EXTENDS.size() and score.score >= Tun.EXTENDS[_next_extend]:
-		_next_extend += 1
+	if score.score >= _next_extend:
+		_next_extend += Tun.EXTEND_EVERY
 		player.lives += 1
 		hud.banner("EXTEND", "+1 SHIP", 1.5)
 		Audio.play("extend")
