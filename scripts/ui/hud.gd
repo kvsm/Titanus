@@ -126,6 +126,15 @@ func _draw() -> void:
 		PixelFont.draw(self, "TITAN APPROACHING", Vector2(w / 2.0, 228), Tun.C_YELLOW, 1, PixelFont.CENTER)
 	if _chain_lost_t > 0.0 and int(_t * 10.0) % 2 == 0:
 		PixelFont.draw(self, "CHAIN LOST", Vector2(150, 30), Tun.C_PINK, 1, PixelFont.CENTER)
+	if game.lift_paused:
+		draw_rect(Rect2(0, 0, w, h), Color(Tun.C_MIDNIGHT, 0.55))
+		PixelFont.draw(self, "PAUSED", Vector2(w / 2.0, 200), Tun.C_PALE, 3, PixelFont.CENTER)
+		if int(_t * 2.0) % 2 == 0:
+			PixelFont.draw(self, "TOUCH TO CONTINUE", Vector2(w / 2.0, 240), Tun.C_CYAN, 1, PixelFont.CENTER)
+		var mr := Game.MENU_RECT
+		draw_rect(mr, Color(Tun.C_DEEP, 0.9))
+		draw_rect(mr, Tun.C_GRID, false, 1.0)
+		PixelFont.draw(self, "MENU", Vector2(mr.get_center().x, mr.position.y + 8), Tun.C_CHROME_L, 1, PixelFont.CENTER)
 	if game.game_over:
 		draw_rect(Rect2(0, 180, w, 70), Color(Tun.C_MIDNIGHT, 0.85))
 		PixelFont.draw(self, "GAME OVER", Vector2(w / 2.0, 192), Tun.C_PINK, 3, PixelFont.CENTER)

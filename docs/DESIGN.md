@@ -37,13 +37,13 @@
 - While a finger is down, the ship moves **toward the touch point**, with **speed capped at the ship's current speed** (starts at `speed_base`, raised by speed power-ups up to `speed_max`).
 - The ship never teleports. A touch far from the ship makes it travel there at max speed.
 - Arrival is smooth: inside a small radius the speed eases off so the ship stops on the point instead of jittering.
-- When the finger lifts, the ship **stays where it is** (and keeps firing).
+- When the steering finger lifts, the game **pauses** ("TOUCH TO CONTINUE"). Touching anywhere resumes, and that touch becomes the steering finger. A MENU button on that screen opens the full pause menu.
 - The ship is clamped to the playfield (a margin of half its width).
 - `touch_offset_y` is a tunable, **default 0** (the ship sits directly under your finger, as chosen). If playtesting shows the finger hides too much, raising it to ~24 px puts the ship above the fingertip.
 
 | Tunable | Start value |
 |---|---|
-| `speed_base` | 160 px/s at the start of a level |
+| `speed_base` | 128 px/s (40% of the cap) at the start of the campaign |
 | `speed_max` | 320 px/s, reached with speed power-ups (crossing the 270 px width takes ~0.85 s) |
 | `arrive_radius` | 6 px |
 | `touch_offset_y` | 0 px |
@@ -105,13 +105,13 @@ Three weapon types. Each one has **power levels 1–10**. Damage for every level
 **Balance:** focused damage runs **Laser > Vulcan (about 75%) > Wave (about 60%)**, and area damage runs **Wave >> Vulcan > Laser**. [weapon_balance.md](weapon_balance.md) has the measured numbers for every level and scenario, from the weapon bench (`godot --headless -- --bench`). All values are tunable in `scripts/core/tun.gd`.
 
 ### 5.1 Pickups
-- **Weapon capsule.** Every supply ship (carrier) **always** drops one. There are six per level. It drifts down slowly and **cycles colour (Vulcan → Laser → Wave) every 1.5 s**, so you choose your weapon by when you grab it.
+- **Weapon capsule.** Every supply ship (carrier) **always** drops one, and so does every mid-boss. There are three supply ships per level. It drifts down slowly and **cycles colour (Vulcan → Laser → Wave) every 1.5 s**, so you choose your weapon by when you grab it.
   - **Same type as your current weapon:** +1 power level. At L10 it gives +5,000 points instead.
   - **Different type:** you switch to that type and **reset to L2**. Timing the colour matters.
-  - Level 1 has 6 supply ships, so a single weapon can reach about **L7** within it. L8–L10 are for later levels.
+  - Each level has 4 capsules (3 supply ships plus the mid-boss), so a single weapon reaches about L5 by the end of Level 1 and L9 by the end of Level 2.
 - **Shield cell** (green S): restores 1 pip. A **1% random drop from any enemy kill**.
 - **Bomb** (B): +1 bomb (maximum 5). A **1% random drop from any enemy kill**.
-- **Speed** (orange chevrons): ship speed ×1.05, up to the 320 px/s cap. About 15 pickups take you from the starting 160 px/s to the cap. Above the cap it gives +5,000 points. A **5% random drop from any enemy kill**. Speed is kept when you lose a life.
+- **Speed** (orange chevrons): ship speed ×1.05, up to the 320 px/s cap. About 19 pickups take you from the starting 128 px/s to the cap. Above the cap it gives +5,000 points. A **5% random drop from any enemy kill**. Speed is kept when you lose a life.
 - Only one random drop is rolled per kill. Supply ships drop their capsule instead.
 - Pickups that scroll off-screen are lost, but **do not** break the chain.
 
@@ -177,10 +177,10 @@ Base scroll speed: 30 px/s, speeding up to 60 px/s during the Highway Rush secti
 | Time | Section | What happens |
 |---|---|---|
 | 0:00–0:06 | **Intro** | The ship flies up from the bottom. "STAGE 1 — NEON DRIVE" in chrome text. The sun reflects in the plaza. No enemies. |
-| 0:06–0:40 | **A. Outskirts** | Teaches movement and the chain. Glitch drone V-formations from the top and sides. First Strobe divers at 0:20. Weapon carriers at 0:14 and 0:27. |
-| 0:40–1:15 | **B. Downtown** | Rooftop turrets appear (they scroll with the city, so you have to kill them before they reach the bottom). Hover cars cross in lanes. Carriers at 0:45 and 1:00. **PRISMs appear from 0:55.** Density goes up. |
+| 0:06–0:40 | **A. Outskirts** | Teaches movement and the chain. Glitch drone V-formations from the top and sides. First Strobe divers at 0:20. Weapon carrier at 0:14. |
+| 0:40–1:15 | **B. Downtown** | Rooftop turrets appear (they scroll with the city, so you have to kill them before they reach the bottom). Hover cars cross in lanes. Carrier at 0:45. **PRISMs appear from 0:55.** Density goes up. |
 | 1:15–1:35 | **Mid-boss: SUBWOOFER** | An armoured tank rolls down the highway, firing beat-synced rings. The scroll slows while it's alive. |
-| 1:35–2:00 | **C. Highway Rush** | The scroll speeds up and the music shifts up a gear. Fast mixed waves: hover-car convoys and Strobe divers. **EQUALIZERs appear** (1:21, 1:31), along with more PRISMs. Carriers at 1:25 and 1:36. |
+| 1:35–2:00 | **C. Highway Rush** | The scroll speeds up and the music shifts up a gear. Fast mixed waves: hover-car convoys and Strobe divers. **EQUALIZERs appear** (1:21, 1:31), along with more PRISMs. Carrier at 1:36; the mid-boss also drops a capsule. |
 | 2:00–2:06 | **Warning** | The screen tints red. "⚠ WARNING — TITAN APPROACHING ⚠" over a siren synth. Remaining bullets fade out. |
 | 2:06–~2:45 | **Boss: HELIOS** | See §9. |
 | End | **Results** | Score tally, then the rank. |
@@ -326,10 +326,10 @@ Level 1 is fully implemented as described above. Known differences from this doc
 
 | Time | Section | What happens |
 |---|---|---|
-| 0:00–0:38 | **A. Harbour** | Jetski squadrons (dive, zigzag and wake paths) and Harpooners. Mines appear from 0:20. Trawlers at 0:14 and 0:27. |
-| 0:38–1:16 | **B. Open sea** | Inkers, mine fields, Harpooners, and Torpedo Boats from 0:55. Trawlers at 0:45 and 1:00. |
+| 0:00–0:38 | **A. Harbour** | Jetski squadrons (dive, zigzag and wake paths) and Harpooners. Mines appear from 0:20. Trawler at 0:14. |
+| 0:38–1:16 | **B. Open sea** | Inkers, mine fields, Harpooners, and Torpedo Boats from 0:55. Trawler at 0:45. |
 | 1:16–1:18 | **Mid-boss: BARRACUDA** | The scroll slows while it's alive. |
-| 1:18–1:45 | **C. Maelstrom** (storm) | Faster scroll. Sonar Frigates at 1:21 and 1:31, plus Torpedo Boats, Inkers, mines and jetskis. Trawlers at 1:25 and 1:36. |
+| 1:18–1:45 | **C. Maelstrom** (storm) | Faster scroll. Sonar Frigates at 1:21 and 1:31, plus Torpedo Boats, Inkers, mines and jetskis. Trawler at 1:36; the mid-boss also drops a capsule. |
 | 1:45–1:51 | **Warning** | |
 | 1:51– | **Boss: LEVIATHAN** | See §15.4. |
 

@@ -23,38 +23,41 @@ Measured with the weapon bench: `godot --headless -- --bench[=file.md]`. It fire
 
 | weapon | L | small_far | small_near | large | large_far | offset_40 | swarm_27 |
 |---|---|---|---|---|---|---|---|
-| vulcan | 1 | 40 | 40 | 40 | 40 | 0 | 40 |
-| vulcan | 2 | 44 | 44 | 44 | 44 | 15 | 73 |
-| vulcan | 3 | 56 | 56 | 56 | 56 | 15 | 115 |
-| vulcan | 4 | 75 | 75 | 75 | 75 | 16 | 156 |
-| vulcan | 5 | 93 | 93 | 92 | 93 | 17 | 180 |
-| vulcan | 6 | 109 | 108 | 108 | 108 | 19 | 239 |
-| vulcan | 7 | 123 | 123 | 123 | 123 | 19 | 258 |
-| vulcan | 8 | 137 | 137 | 137 | 137 | 21 | 242 |
-| vulcan | 9 | 151 | 151 | 151 | 151 | 22 | 260 |
-| vulcan | 10 | 168 | 168 | 168 | 168 | 24 | 286 |
-| laser | 1 | 50 | 50 | 50 | 50 | 0 | 50 |
-| laser | 2 | 63 | 63 | 63 | 63 | 0 | 63 |
-| laser | 3 | 81 | 81 | 81 | 81 | 0 | 81 |
-| laser | 4 | 104 | 104 | 104 | 104 | 0 | 104 |
-| laser | 5 | 121 | 121 | 121 | 121 | 0 | 121 |
-| laser | 6 | 140 | 140 | 140 | 140 | 0 | 140 |
-| laser | 7 | 158 | 158 | 158 | 158 | 0 | 158 |
-| laser | 8 | 175 | 175 | 175 | 175 | 0 | 175 |
-| laser | 9 | 194 | 194 | 194 | 194 | 0 | 194 |
-| laser | 10 | 216 | 216 | 216 | 216 | 0 | 216 |
-| wave | 1 | 32 | 32 | 33 | 33 | 0 | 63 |
-| wave | 2 | 39 | 39 | 41 | 41 | 0 | 80 |
-| wave | 3 | 50 | 50 | 50 | 50 | 52 | 305 |
-| wave | 4 | 67 | 65 | 65 | 65 | 67 | 401 |
-| wave | 5 | 77 | 77 | 77 | 77 | 77 | 462 |
-| wave | 6 | 85 | 85 | 85 | 85 | 85 | 850 |
-| wave | 7 | 93 | 96 | 96 | 96 | 93 | 939 |
-| wave | 8 | 102 | 106 | 102 | 106 | 102 | 1031 |
-| wave | 9 | 111 | 111 | 111 | 111 | 115 | 1127 |
-| wave | 10 | 129 | 129 | 125 | 125 | 125 | 1253 |
+| vulcan | 1 | 34 | 34 | 34 | 34 | 0 | 34 |
+| vulcan | 2 | 36 | 36 | 36 | 36 | 12 | 60 |
+| vulcan | 3 | 42 | 42 | 42 | 42 | 11 | 86 |
+| vulcan | 4 | 52 | 52 | 52 | 52 | 11 | 108 |
+| vulcan | 5 | 61 | 61 | 60 | 61 | 11 | 118 |
+| vulcan | 6 | 69 | 69 | 69 | 69 | 12 | 153 |
+| vulcan | 7 | 76 | 76 | 76 | 76 | 12 | 160 |
+| vulcan | 8 | 84 | 84 | 84 | 84 | 13 | 148 |
+| vulcan | 9 | 91 | 91 | 91 | 91 | 13 | 156 |
+| vulcan | 10 | 100 | 100 | 100 | 100 | 14 | 170 |
+| laser | 1 | 43 | 43 | 43 | 43 | 0 | 43 |
+| laser | 2 | 49 | 49 | 49 | 49 | 0 | 49 |
+| laser | 3 | 58 | 58 | 58 | 58 | 0 | 58 |
+| laser | 4 | 70 | 70 | 70 | 70 | 0 | 70 |
+| laser | 5 | 79 | 79 | 79 | 79 | 0 | 79 |
+| laser | 6 | 88 | 88 | 88 | 88 | 0 | 88 |
+| laser | 7 | 97 | 97 | 97 | 97 | 0 | 97 |
+| laser | 8 | 106 | 106 | 106 | 106 | 0 | 106 |
+| laser | 9 | 116 | 116 | 116 | 116 | 0 | 116 |
+| laser | 10 | 127 | 127 | 127 | 127 | 0 | 127 |
+| wave | 1 | 24 | 24 | 25 | 25 | 0 | 47 |
+| wave | 2 | 27 | 27 | 28 | 28 | 0 | 55 |
+| wave | 3 | 32 | 32 | 32 | 32 | 33 | 195 |
+| wave | 4 | 40 | 39 | 39 | 39 | 40 | 239 |
+| wave | 5 | 44 | 44 | 44 | 44 | 44 | 265 |
+| wave | 6 | 48 | 48 | 48 | 48 | 48 | 478 |
+| wave | 7 | 51 | 53 | 53 | 53 | 51 | 517 |
+| wave | 8 | 56 | 57 | 56 | 57 | 56 | 559 |
+| wave | 9 | 60 | 60 | 60 | 60 | 61 | 603 |
+| wave | 10 | 68 | 68 | 66 | 66 | 66 | 659 |
 
-## What was wrong before this pass (L10 numbers)
+## Later tuning
+- **v0.1 difficulty pass:** each level now keeps only 60% of its gain over L1. On top of that, Laser and Vulcan do 15% less damage and the Wave 25% less, at every level. At L10, focused damage is 127 (Laser) / 100 (Vulcan) / 66 (Wave), down from 216 / 168 / 129.
+
+## What was wrong before the balance pass (L10 numbers)
 
 - **Wave stacking:** overlapping crescents each hit the same target, so the Wave did 643 DPS against a small enemy nearby and 375 against a large one, against the Laser's 216. Crescents in one volley now share their hits, so a target is hit at most once per volley.
 - **Wave area:** each crescent pierced everything it touched, giving 3,402 DPS against the swarm. Each crescent now passes through at most 2 enemies, and L9–L10 fire 5 wider-spread crescents instead of 7.

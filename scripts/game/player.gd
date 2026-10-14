@@ -117,8 +117,7 @@ func _fire(dt: float) -> void:
 				_fire_t += float(cfg.interval)
 				_volley += 1
 				for s: Array in cfg.get("heavy", []):
-					game.shots.fire_vulcan(position + Vector2(s[0], -12), s[1], cfg.heavy_dmg,
-						float(cfg.heavy_dmg) >= Tun.HEAVY_SLUG_DMG)
+					game.shots.fire_vulcan(position + Vector2(s[0], -12), s[1], cfg.heavy_dmg, cfg.get("slug", false))
 				for s: Array in cfg.streams:
 					game.shots.fire_vulcan(position + Vector2(s[0], -10), s[1], cfg.dmg)
 				if cfg.has("side") and _volley % 2 == 0:

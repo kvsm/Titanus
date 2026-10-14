@@ -7,6 +7,8 @@ signal retry
 signal quit_to_title
 
 const PAUSE_RECT := Rect2(240, 0, 30, 22)
+## Shown while lift-paused: opens the full pause menu instead of resuming.
+const MENU_RECT := Rect2(95, 300, 80, 22)
 
 var level_index := 1
 ## Loadout carried in from the previous level (empty = fresh start):
@@ -37,6 +39,8 @@ var target_scroll := 30.0
 var enemies: Array[Enemy] = []
 var extra_targets: Array[Target] = [] # dev weapon bench dummies
 var paused := false
+## Touch controls: lifting the steering finger pauses; touching anywhere resumes and steers.
+var lift_paused := false
 var time := 0.0
 
 var _camera: Camera2D
@@ -110,6 +114,8 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	if paused:
+		if lift_paused:
+			hud.update(delta) # keep the "touch to continue" overlay animating
 		return
 	var dt := minf(delta, 1.0 / 30.0)
 	if autotest:
@@ -150,6 +156,14 @@ func _process(delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
 		var t := event as InputEventScreenTouch
+		if lift_paused:
+			if t.pressed:
+				if MENU_RECT.has_point(t.position):
+					lift_paused = false
+					open_pause()
+				else:
+					_resume_from_lift(t)
+			return
 		if paused:
 			pause_menu.handle_touch(t)
 			return
@@ -177,6 +191,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif t.index == _steer_index:
 			_steer_index = -1
 			player.release_target()
+			_lift_pause()
 	elif event is InputEventScreenDrag:
 		var d := event as InputEventScreenDrag
 		if not paused and d.index == _steer_index:
@@ -196,6 +211,9 @@ func _unhandled_input(event: InputEvent) -> void:
 func on_back() -> void:
 	if game_over or level_done:
 		quit_to_title.emit()
+	elif lift_paused:
+		lift_paused = false
+		open_pause()
 	elif paused:
 		pause_menu.resume()
 	else:
@@ -212,10 +230,27 @@ func open_pause() -> void:
 	if game_over or level_done:
 		return
 	paused = true
+	lift_paused = false
 	_steer_index = -1
 	player.release_target()
 	pause_menu.open()
 	Audio.set_music_paused(true)
+
+
+func _lift_pause() -> void:
+	if game_over or level_done or autotest or control_scheme != "touch":
+		return
+	paused = true
+	lift_paused = true
+	Audio.set_music_paused(true)
+
+
+func _resume_from_lift(t: InputEventScreenTouch) -> void:
+	lift_paused = false
+	paused = false
+	Audio.set_music_paused(false)
+	_steer_index = t.index
+	player.set_target(t.position)
 
 
 func _on_resume() -> void:

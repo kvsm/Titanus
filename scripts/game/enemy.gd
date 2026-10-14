@@ -87,6 +87,7 @@ func setup(k: String, p: Dictionary, g: Game) -> void:
 			_home_x = position.x
 		"subwoofer":
 			position = Vector2(135, -30)
+			drop = "capsule" # mid-bosses always drop a weapon capsule
 		"mine":
 			ground = true
 			position = Vector2(float(p.get("x", 135.0)), -10)
@@ -100,6 +101,7 @@ func setup(k: String, p: Dictionary, g: Game) -> void:
 			_vel = Vector2(0, 40)
 		"barracuda":
 			position = Vector2(135, 110)
+			drop = "capsule" # mid-bosses always drop a weapon capsule
 			_home_x = position.x
 			alpha = 0.0
 			targetable = false

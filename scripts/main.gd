@@ -117,7 +117,7 @@ func _dev_preset(n: int) -> Dictionary:
 	if n <= 1:
 		return {}
 	return {"score": 0, "lives": Tun.LIVES, "bombs": Tun.BOMBS_START,
-		"weapon": _weapon if _weapon != "" else "vulcan", "weapon_level": 5, "speed": 220.0}
+		"weapon": _weapon if _weapon != "" else "vulcan", "weapon_level": 5, "speed": 165.0}
 
 
 func _on_level_finished(stats: Dictionary) -> void:
