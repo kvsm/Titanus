@@ -31,6 +31,7 @@ var boss: BossHelios
 var scroll_speed := 30.0
 var target_scroll := 30.0
 var enemies: Array[Enemy] = []
+var extra_targets: Array[Target] = [] # dev weapon bench dummies
 var paused := false
 var time := 0.0
 
@@ -250,6 +251,7 @@ func targets() -> Array[Target]:
 			out.append(e)
 	if boss:
 		out.append_array(boss.parts())
+	out.append_array(extra_targets)
 	return out
 
 

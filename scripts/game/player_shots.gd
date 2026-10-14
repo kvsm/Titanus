@@ -11,6 +11,7 @@ class Shot:
 	var heavy := false # Vulcan forward slug
 	var half := Vector2(1.5, 4)
 	var hits := {}
+	var pierce_left := 0
 
 var game: Game
 var shots: Array[Shot] = []
@@ -40,8 +41,10 @@ func fire_vulcan(from: Vector2, angle_deg: float, dmg: float, heavy: bool = fals
 	shots.append(s)
 
 
-func fire_wave(from: Vector2, angle_deg: float, dmg: float, level: int) -> void:
+func fire_wave(from: Vector2, angle_deg: float, dmg: float, level: int, shared_hits: Dictionary = {}) -> void:
 	var s := Shot.new()
+	s.hits = shared_hits
+	s.pierce_left = int(Tun.WAVE[level - 1].pierce)
 	s.pos = from
 	s.vel = Vector2.UP.rotated(deg_to_rad(angle_deg)) * Tun.WAVE_SPEED
 	s.dmg = dmg
@@ -76,6 +79,10 @@ func update(dt: float, targets: Array[Target]) -> void:
 					s.hits[id] = true
 					t.take_damage(s.dmg)
 					game.fx.spark(t.global_position.lerp(s.pos, 0.5), Tun.C_MINT, 2)
+					s.pierce_left -= 1
+					if s.pierce_left <= 0:
+						consumed = true
+						break
 		if consumed:
 			shots.remove_at(i)
 		else:

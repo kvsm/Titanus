@@ -40,6 +40,7 @@ Download it from the run's **Artifacts** (`titanus-debug-apk`). Pushing a `v*` t
 | Regenerate sprites, font, backgrounds and icons | `python3 tools/gen_sprites.py` (needs Pillow) |
 | Regenerate SFX and music | `python3 tools/gen_audio.py` (needs numpy and ffmpeg with libvorbis) |
 | Smoke test | `godot --headless --fixed-fps 60 -- --autotest [--weapon=vulcan\|laser\|wave] [--controls=tilt]` |
+| Weapon balance table (see `docs/weapon_balance.md`) | `godot --headless -- --bench=docs/weapon_balance_raw.md` |
 | Screenshots of a full run | `godot --fixed-fps 60 -- --autotest --shots=/some/dir` |
 
 Where to change things:

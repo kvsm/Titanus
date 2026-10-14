@@ -56,13 +56,15 @@ const WEAPONS: Array[String] = ["vulcan", "laser", "wave"]
 
 # --- weapons (§5). Streams are [x offset, angle in degrees from straight up].
 # Damage for levels 2+ already includes a 10% reduction (v0.1 tuning pass).
-# Vulcan "heavy" streams fire big forward slugs dealing heavy_dmg: from L4 the focused
-# forward damage sits between the Wave and the Laser, while the spread keeps crowd control.
+# Vulcan "heavy" streams fly straight ahead and deal heavy_dmg (drawn as big slugs once
+# heavy_dmg >= HEAVY_SLUG_DMG); the angled "streams" give it some area coverage.
+# Balance targets (measure with `--bench`): focused DPS Laser > Vulcan (~75%) > Wave (~60%);
+# area (a row of enemies) Wave >> Vulcan > Laser.
 const VULCAN := [
-	{"interval": 0.075, "dmg": 1.5, "streams": [[-4, 0], [4, 0]]},  # L1
-	{"interval": 0.075, "dmg": 1.26, "streams": [[-5, -4], [0, 0], [5, 4]]},  # L2
-	{"interval": 0.075, "dmg": 1.17, "streams": [[-6, -8], [-2, 0], [2, 0], [6, 8]]},  # L3
-	{"interval": 0.075, "dmg": 1.22, "heavy_dmg": 2.88, "heavy": [[-3, 0], [3, 0]], "streams": [[-8, -10], [8, 10], [-10, -16], [10, 16]], "side": [[-6, -35], [6, 35]]},  # L4
+	{"interval": 0.075, "dmg": 1.5, "heavy_dmg": 1.5, "heavy": [[-4, 0], [4, 0]], "streams": []},  # L1
+	{"interval": 0.075, "dmg": 1.1, "heavy_dmg": 1.65, "heavy": [[-4, 0], [4, 0]], "streams": [[-7, -10], [7, 10]]},  # L2
+	{"interval": 0.075, "dmg": 1.1, "heavy_dmg": 2.1, "heavy": [[-4, 0], [4, 0]], "streams": [[-7, -10], [7, 10], [-9, -18], [9, 18]]},  # L3
+	{"interval": 0.075, "dmg": 1.22, "heavy_dmg": 2.8, "heavy": [[-3, 0], [3, 0]], "streams": [[-8, -10], [8, 10], [-10, -16], [10, 16]], "side": [[-6, -35], [6, 35]]},  # L4
 	{"interval": 0.07, "dmg": 1.22, "heavy_dmg": 2.16, "heavy": [[-4, 0], [0, 0], [4, 0]], "streams": [[-9, -10], [9, 10], [-11, -18], [11, 18]], "side": [[-6, -35], [6, 35]]},  # L5
 	{"interval": 0.065, "dmg": 1.22, "heavy_dmg": 2.34, "heavy": [[-4, 0], [0, 0], [4, 0]], "streams": [[-9, -8], [9, 8], [-11, -14], [11, 14], [-12, -22], [12, 22]], "side": [[-6, -35], [6, 35], [-6, -55], [6, 55]]},  # L6
 	{"interval": 0.065, "dmg": 1.26, "heavy_dmg": 2.67, "heavy": [[-4, 0], [0, 0], [4, 0]], "streams": [[-9, -8], [9, 8], [-11, -14], [11, 14], [-12, -22], [12, 22]], "side": [[-6, -35], [6, 35], [-6, -55], [6, 55]]},  # L7
@@ -71,21 +73,24 @@ const VULCAN := [
 	{"interval": 0.055, "dmg": 1.3, "heavy_dmg": 2.31, "heavy": [[-6, 0], [-2, 0], [2, 0], [6, 0]], "streams": [[-10, -8], [10, 8], [-12, -14], [12, 14], [-13, -20], [13, 20], [-14, -28], [14, 28]], "side": [[-6, -35], [6, 35], [-6, -55], [6, 55], [-8, -75], [8, 75]]},  # L10
 ]
 const VULCAN_SPEED := 520.0
+const HEAVY_SLUG_DMG := 2.0
 const LASER_WIDTH: Array[float] = [4.0, 6.0, 8.0, 12.0, 15.0, 18.0, 20.0, 22.0, 24.0, 26.0]
 const LASER_DPS: Array[float] = [50.0, 63.0, 81.0, 103.5, 121.5, 139.5, 157.5, 175.5, 193.5, 216.0]
 const WAVE := [
-	{"interval": 0.22, "dmg": 7.0, "angles": [0]},  # L1
-	{"interval": 0.22, "dmg": 8.73, "angles": [0]},  # L2
-	{"interval": 0.22, "dmg": 11.16, "angles": [-14, 0, 14]},  # L3
-	{"interval": 0.22, "dmg": 14.4, "angles": [-16, 0, 16]},  # L4
-	{"interval": 0.2, "dmg": 15.39, "angles": [-16, 0, 16]},  # L5
-	{"interval": 0.2, "dmg": 17.01, "angles": [-26, -13, 0, 13, 26]},  # L6
-	{"interval": 0.19, "dmg": 18.0, "angles": [-26, -13, 0, 13, 26]},  # L7
-	{"interval": 0.18, "dmg": 18.63, "angles": [-26, -13, 0, 13, 26]},  # L8
-	{"interval": 0.18, "dmg": 20.25, "angles": [-30, -20, -10, 0, 10, 20, 30]},  # L9
-	{"interval": 0.17, "dmg": 21.42, "angles": [-30, -20, -10, 0, 10, 20, 30]},  # L10
+	{"interval": 0.22, "dmg": 7.0, "pierce": 2, "angles": [0]},  # L1
+	{"interval": 0.22, "dmg": 8.73, "pierce": 2, "angles": [0]},  # L2
+	{"interval": 0.22, "dmg": 11.16, "pierce": 2, "angles": [-14, 0, 14]},  # L3
+	{"interval": 0.22, "dmg": 14.4, "pierce": 2, "angles": [-16, 0, 16]},  # L4
+	{"interval": 0.2, "dmg": 15.39, "pierce": 2, "angles": [-16, 0, 16]},  # L5
+	{"interval": 0.2, "dmg": 17.01, "pierce": 2, "angles": [-26, -13, 0, 13, 26]},  # L6
+	{"interval": 0.19, "dmg": 18.0, "pierce": 2, "angles": [-26, -13, 0, 13, 26]},  # L7
+	{"interval": 0.18, "dmg": 18.63, "pierce": 2, "angles": [-26, -13, 0, 13, 26]},  # L8
+	{"interval": 0.18, "dmg": 20.25, "pierce": 2, "angles": [-32, -16, 0, 16, 32]},  # L9
+	{"interval": 0.17, "dmg": 21.42, "pierce": 2, "angles": [-32, -16, 0, 16, 32]},  # L10
 ]
 const WAVE_SPEED := 300.0
+# Wave: crescents in one volley share hits (a target is hit at most once per volley) and each
+# crescent passes through at most "pierce" enemies. The Laser hits only the first enemy in its beam.
 
 # --- enemies (§8)
 const ESCAPE_MARGIN := 26.0

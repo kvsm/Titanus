@@ -99,25 +99,10 @@ Three weapon types. Each one has **power levels 1–10**. Damage for every level
 | Type | Colour | Role | Description |
 |---|---|---|---|
 | **Vulcan** | Sun-yellow / orange | Coverage | Rapid small bullets. Its spread widens with level: L1 twin stream → L10 wide fan plus three pairs of side shots. From **L4**, the straight-ahead streams become **heavy slugs** whose focused damage sits between the Wave and the Laser. |
-| **Laser** | Hot pink | Single-target | A continuous piercing beam straight up. Width 4 / 6 / 8 / 12 px. Highest damage per second, but you have to line up. |
-| **Wave** | Cyan | Crowd control | Expanding sine-wave crescents that pierce. Wide arc, slower rate of fire, lower damage per hit. |
+| **Laser** | Hot pink | Single-target | A continuous beam straight up that **stops at the first enemy in its path**. Width 4 → 26 px. The highest focused damage, but no area, and you have to line up. |
+| **Wave** | Cyan | Area | Expanding crescents in a wide arc. **Each crescent passes through up to 2 enemies.** Crescents in one volley share their hits, so overlapping crescents can't stack damage on one target. The lowest focused damage (about 60% of the Laser), but by far the widest coverage. |
 
-**Damage targets** (per second against a single target, all streams hitting):
-
-| Level | Vulcan | Laser | Wave |
-|---|---|---|---|
-| 1 | 40 | 50 | 32 |
-| 2 | ~50 | 63 | ~40 |
-| 3 | ~62 | 81 | ~51 |
-| 4 | ~77 (heavy slugs) | 104 | ~65 |
-| 5 | ~93 (heavy slugs) | 122 | ~77 |
-| 6 | ~108 (heavy slugs) | 140 | ~85 |
-| 7 | ~123 (heavy slugs) | 158 | ~95 |
-| 8 | ~137 (heavy slugs) | 176 | ~104 |
-| 9 | ~151 (heavy slugs) | 194 | ~113 |
-| 10 | ~168 (heavy slugs) | 216 | ~126 |
-
-Vulcan and Wave have lower peak damage but hit many targets at once. All values are tunable.
+**Balance:** focused damage runs **Laser > Vulcan (about 75%) > Wave (about 60%)**, and area damage runs **Wave >> Vulcan > Laser**. [weapon_balance.md](weapon_balance.md) has the measured numbers for every level and scenario, from the weapon bench (`godot --headless -- --bench`). All values are tunable in `scripts/core/tun.gd`.
 
 ### 5.1 Pickups
 - **Weapon capsule.** Every supply ship (carrier) **always** drops one. There are six per level. It drifts down slowly and **cycles colour (Vulcan → Laser → Wave) every 1.5 s**, so you choose your weapon by when you grab it.

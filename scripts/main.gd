@@ -6,6 +6,7 @@ extends Node
 ##   --weapon=<name>   with --autotest: play the whole level with vulcan, laser or wave
 ##   --shots=<dir>     with --autotest: save screenshots at fixed times into <dir>
 ##   --screen=results  open the results screen with sample stats (dev preview)
+##   --bench[=out.md] measure every weapon/level against dummy targets and quit (dev)
 ##   --snap=<file>     save a screenshot after 2.5 s and quit (dev preview)
 
 var current: Node
@@ -30,6 +31,12 @@ func _ready() -> void:
 			_shots_dir = a.substr(8)
 		elif a.begins_with("--snap="):
 			_snap = a.substr(7)
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--bench"):
+			var b := WeaponBench.new()
+			b.out_path = a.substr(8) if a.begins_with("--bench=") else ""
+			add_child(b)
+			return
 	if _autotest:
 		start_level(1)
 	elif "--screen=results" in OS.get_cmdline_user_args():

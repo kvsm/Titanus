@@ -30,6 +30,7 @@ var _bomb_cd := 0.0
 var _bomb_requested := false
 var _t := 0.0
 var laser_on := false
+var laser_end_y := 0.0 # screen y where the beam stops
 var _tex: Texture2D
 
 
@@ -115,7 +116,8 @@ func _fire(dt: float) -> void:
 				_fire_t += float(cfg.interval)
 				_volley += 1
 				for s: Array in cfg.get("heavy", []):
-					game.shots.fire_vulcan(position + Vector2(s[0], -12), s[1], cfg.heavy_dmg, true)
+					game.shots.fire_vulcan(position + Vector2(s[0], -12), s[1], cfg.heavy_dmg,
+						float(cfg.heavy_dmg) >= Tun.HEAVY_SLUG_DMG)
 				for s: Array in cfg.streams:
 					game.shots.fire_vulcan(position + Vector2(s[0], -10), s[1], cfg.dmg)
 				if cfg.has("side") and _volley % 2 == 0:
@@ -127,18 +129,30 @@ func _fire(dt: float) -> void:
 			while _fire_t <= 0.0:
 				var cfg: Dictionary = Tun.WAVE[level - 1]
 				_fire_t += float(cfg.interval)
+				# crescents in one volley share their hit list: overlapping crescents can't
+				# multiply damage on a single (near or large) target
+				var volley_hits := {}
 				for a in cfg.angles:
-					game.shots.fire_wave(position + Vector2(0, -12), float(a), cfg.dmg, level)
+					game.shots.fire_wave(position + Vector2(0, -12), float(a), cfg.dmg, level, volley_hits)
 				Audio.play("shot_wave", -12.0)
 		"laser":
 			laser_on = true
+			# the beam stops at the first (closest) enemy in its path: pure focused damage
 			var half_w := Tun.LASER_WIDTH[level - 1] / 2.0
-			var dmg := Tun.LASER_DPS[level - 1] * dt
+			var hit: Target = null
+			var hit_y := -INF
 			for t in game.targets():
 				if t.in_column(position.x, half_w, position.y - 8):
-					t.take_damage(dmg)
-					if randf() < 0.3:
-						game.fx.spark(Vector2(position.x + randf_range(-half_w, half_w), t.global_position.y + t.hit_half.y), Tun.C_PINK, 1)
+					var bottom := t.global_position.y + t.hit_half.y
+					if bottom > hit_y:
+						hit_y = bottom
+						hit = t
+			laser_end_y = 0.0
+			if hit:
+				laser_end_y = clampf(hit_y, 0.0, position.y - 10.0)
+				hit.take_damage(Tun.LASER_DPS[level - 1] * dt)
+				if randf() < 0.3:
+					game.fx.spark(Vector2(position.x + randf_range(-half_w, half_w), laser_end_y), Tun.C_PINK, 1)
 			Audio.play("shot_laser", -16.0)
 
 
@@ -201,7 +215,7 @@ func _draw() -> void:
 
 func _draw_laser() -> void:
 	var w := Tun.LASER_WIDTH[level - 1]
-	var top := -position.y
+	var top := laser_end_y - position.y
 	var jitter := 1.0 if int(_t * 40.0) % 2 == 0 else 0.0
 	var beam_len := -10.0 - top
 	draw_rect(Rect2(-w / 2.0 - 2 - jitter, top, w + 4 + jitter * 2, beam_len), Color(Tun.C_MAGENTA, 0.35))
