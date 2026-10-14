@@ -9,6 +9,7 @@ var target := Vector2.ZERO
 var has_target := false
 ## Current top speed: starts at SPEED_BASE, raised by speed power-ups up to SPEED_MAX.
 var speed := Tun.SPEED_BASE
+var slow_mult := 1.0 # set by the game each frame (ink puddles)
 ## Tilt / keyboard steering: when use_drive is set the ship moves at drive * speed.
 var use_drive := false
 var drive := Vector2.ZERO
@@ -94,7 +95,7 @@ func _move(dt: float) -> void:
 		position = position.move_toward(Vector2(position.x, 400), Tun.SPEED_MAX * 0.6 * dt)
 		return
 	if use_drive:
-		position += drive.limit_length(1.0) * speed * dt
+		position += drive.limit_length(1.0) * speed * slow_mult * dt
 		position.x = clampf(position.x, Tun.PLAYER_MARGIN_X, Tun.SCREEN.x - Tun.PLAYER_MARGIN_X)
 		position.y = clampf(position.y, Tun.PLAYER_MIN_Y, Tun.SCREEN.y - 10)
 		return
@@ -104,7 +105,7 @@ func _move(dt: float) -> void:
 	goal.x = clampf(goal.x, Tun.PLAYER_MARGIN_X, Tun.SCREEN.x - Tun.PLAYER_MARGIN_X)
 	goal.y = clampf(goal.y, Tun.PLAYER_MIN_Y, Tun.SCREEN.y - 10)
 	# move_toward never overshoots, so the ship settles exactly on the finger
-	position = position.move_toward(goal, speed * dt)
+	position = position.move_toward(goal, speed * slow_mult * dt)
 
 
 func _fire(dt: float) -> void:

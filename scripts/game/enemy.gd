@@ -1,9 +1,14 @@
 class_name Enemy
 extends Target
-## All regular enemies (§8). Behaviour is chosen by `kind`.
+## All regular enemies (§8). Behaviour is chosen by `behaviour` (the kind's own name unless
+## Tun.ENEMIES gives it another one, e.g. the Level 2 TRAWLER flies like a carrier).
 ## An enemy that has entered the screen and then leaves it alive "escapes" and breaks the chain.
 
 var kind := ""
+var behaviour := ""
+## Projectile-like enemies (torpedoes) give points but never count for the chain or kill %.
+var chain_exempt := false
+var alpha := 1.0
 var params := {}
 var score_value := 100
 var drop := ""
@@ -46,7 +51,9 @@ func setup(k: String, p: Dictionary, g: Game) -> void:
 	score_value = cfg.score
 	_tex = Tun.tex(cfg.tex)
 	drop = str(p.get("drop", ""))
-	match kind:
+	behaviour = str(cfg.get("behaviour", k))
+	chain_exempt = bool(cfg.get("exempt", false))
+	match behaviour:
 		"glitch":
 			_path = Paths.build(str(p.get("path", "dive_u")), bool(p.get("mirror", false)), float(p.get("dx", 0.0)))
 			position = _path[0]
@@ -80,6 +87,22 @@ func setup(k: String, p: Dictionary, g: Game) -> void:
 			_home_x = position.x
 		"subwoofer":
 			position = Vector2(135, -30)
+		"mine":
+			ground = true
+			position = Vector2(float(p.get("x", 135.0)), -10)
+		"harpooner", "inker", "torpedo_boat", "frigate":
+			position = Vector2(float(p.get("x", 135.0)), -24)
+			_home_x = position.x
+			_fire_t = 1.0
+			_shots_left = {"harpooner": 3, "inker": 3, "torpedo_boat": 3, "frigate": 4}[behaviour]
+		"torpedo":
+			position = p.get("pos", Vector2(135, 60))
+			_vel = Vector2(0, 40)
+		"barracuda":
+			position = Vector2(135, 110)
+			_home_x = position.x
+			alpha = 0.0
+			targetable = false
 		"note":
 			position = p.get("pos", Vector2(135, 60))
 			_vel = Vector2(randf_range(-40, 40), 60)
@@ -88,7 +111,7 @@ func setup(k: String, p: Dictionary, g: Game) -> void:
 func update(dt: float) -> void:
 	_t += dt
 	flash = maxf(0.0, flash - dt)
-	match kind:
+	match behaviour:
 		"glitch": _update_glitch(dt)
 		"strobe": _update_strobe(dt)
 		"turret": _update_turret(dt)
@@ -98,6 +121,13 @@ func update(dt: float) -> void:
 		"equalizer": _update_equalizer(dt)
 		"subwoofer": _update_subwoofer(dt)
 		"note": _update_note(dt)
+		"mine": _update_mine(dt)
+		"harpooner": _update_harpooner(dt)
+		"inker": _update_inker(dt)
+		"torpedo_boat": _update_torpedo_boat(dt)
+		"torpedo": _update_torpedo(dt)
+		"frigate": _update_frigate(dt)
+		"barracuda": _update_barracuda(dt)
 	if dead:
 		return
 	if not entered:
@@ -341,6 +371,186 @@ func _update_note(dt: float) -> void:
 	position += _vel * dt
 
 
+# ----------------------------------------------------------------- Level 2: NEON TIDE
+
+## Shared by the gunboats: sail down to a station, sway, and leave after their volleys.
+func _station(dt: float, target_y: float, sway: float) -> bool:
+	match _state:
+		0:
+			position.y += maxf(26.0, (target_y - position.y) * 1.6) * dt
+			if position.y >= target_y - 1.0:
+				_state = 1
+				_timer = 0.0
+		1:
+			_timer += dt
+			position.x = _home_x + sin(_timer * 0.8) * sway
+			return true
+		2:
+			_vel.y = maxf(_vel.y - 70.0 * dt, -100.0)
+			position += _vel * dt
+	return false
+
+
+## MINE: floats with the water. Arms when the player comes close, blinks, then bursts.
+func _update_mine(dt: float) -> void:
+	position.y += game.scroll_speed * dt
+	match _state:
+		0:
+			if position.y > 20.0 and game.player.alive and position.distance_to(game.player.position) < 70.0:
+				_state = 1
+				_timer = 0.6
+				Audio.play("mine_arm")
+		1:
+			_timer -= dt
+			if _timer <= 0.0:
+				game.bullets.ring(position, 12, 85.0, Tun.B.ORANGE, randf() * TAU)
+				game.fx.explode(position, 1)
+				Audio.play("explode_small")
+				game.remove_enemy(self, false) # detonated: no kill, no chain break
+
+
+## HARPOONER: aims (telegraph line), then fires a harpoon that leaves a hanging chain.
+func _update_harpooner(dt: float) -> void:
+	if not _station(dt, float(params.get("y", 90.0)), 30.0):
+		return
+	_fire_t -= dt
+	if _fire_t <= 0.8 and _fire_t > 0.0 and _glow == 0.0 and _can_fire():
+		_glow = 1.0 # start the telegraph and lock the aim
+		_gun_angle = game.bullets.aim(position)
+	if _fire_t <= 0.0:
+		_fire_t = 2.4
+		if _glow > 0.0:
+			game.bullets.fire(position + Vector2(0, 12), _gun_angle, 260.0, Tun.B.HARPOON)
+			Audio.play("harpoon")
+			_shots_left -= 1
+		_glow = 0.0
+		if _shots_left <= 0:
+			_state = 2
+
+
+## INKER: squid drone. Pulses down, squirts slowing ink puddles plus a slow pellet fan.
+func _update_inker(dt: float) -> void:
+	var target_y := float(params.get("y", 130.0))
+	if _state == 0:
+		# jet-propulsion: bursts of speed
+		position.y += (40.0 + 90.0 * maxf(0.0, sin(_t * 5.0))) * dt
+		if position.y >= target_y:
+			_state = 1
+			_timer = 0.0
+		return
+	if _state == 2:
+		_vel.y = maxf(_vel.y - 80.0 * dt, -110.0)
+		position += _vel * dt
+		return
+	_timer += dt
+	position.x = _home_x + sin(_timer * 1.4) * 14.0
+	_fire_t -= dt
+	if _fire_t <= 0.0:
+		_fire_t = 2.0
+		if _can_fire():
+			game.ink.spawn(position + Vector2(0, 16))
+			game.bullets.fan(position + Vector2(0, 10), game.bullets.aim(position), 5, 50.0, 60.0, Tun.B.VIOLET)
+			Audio.play("splash")
+		_shots_left -= 1
+		if _shots_left <= 0:
+			_state = 2
+
+
+## TORPEDO BOAT: launches pairs of shootable torpedoes that steer towards the player's column.
+func _update_torpedo_boat(dt: float) -> void:
+	if not _station(dt, float(params.get("y", 80.0)), 40.0):
+		return
+	_fire_t -= dt
+	if _fire_t <= 0.0:
+		_fire_t = 2.2
+		if _can_fire():
+			for x in [-6.0, 6.0]:
+				game.spawn_enemy("torpedo", {"pos": position + Vector2(x, 14)})
+			Audio.play("torpedo")
+		_shots_left -= 1
+		if _shots_left <= 0:
+			_state = 2
+
+
+func _update_torpedo(dt: float) -> void:
+	var p := game.player
+	if _t < 1.6 and p.alive:
+		_vel.x = move_toward(_vel.x, clampf((p.position.x - position.x) * 2.0, -70.0, 70.0), 160.0 * dt)
+	_vel.y = minf(_vel.y + 150.0 * dt, 180.0)
+	position += _vel * dt
+	if randf() < 0.4:
+		game.fx.spark(position + Vector2(0, -7), Tun.C_CYAN, 1) # bubble wake
+
+
+## SONAR FRIGATE: sonar pings are bullet rings with a gap; an echo ring follows.
+func _update_frigate(dt: float) -> void:
+	if not _station(dt, float(params.get("y", 70.0)), 36.0):
+		return
+	_fire_t -= dt
+	if _fire_t <= 0.0:
+		_fire_t = 2.6
+		if _can_fire():
+			_ping(0.0)
+			_pulse = 0.5 # schedules the echo
+			Audio.play("sonar")
+		_shots_left -= 1
+	if _pulse > 0.0:
+		_pulse -= dt
+		if _pulse <= 0.0 and _can_fire():
+			_ping(PI / 28.0 * 3.0)
+	if _shots_left <= 0 and _pulse <= 0.0:
+		_state = 2
+
+
+func _ping(extra: float) -> void:
+	var n := 28
+	var gap_center := _gun_angle + extra
+	_gun_angle += deg_to_rad(40.0)
+	for i in n:
+		var a := TAU * i / n
+		if absf(angle_difference(a, gap_center)) < TAU * 2.6 / n:
+			continue # the gap you dodge through
+		game.bullets.fire(position, a, 70.0, Tun.B.SONAR)
+	game.fx.ring(position, Tun.C_CYAN, 60.0, 0.5, 1.0)
+
+
+## BARRACUDA (mid-boss submarine): surfaces, fires torpedo salvos and sonar rings, then dives
+## (untargetable) and resurfaces elsewhere.
+func _update_barracuda(dt: float) -> void:
+	_timer += dt
+	match _state:
+		0: # surfacing
+			alpha = minf(1.0, alpha + dt / 1.2)
+			if alpha >= 1.0:
+				_state = 1
+				_timer = 0.0
+				targetable = true
+				game.fx.ring(position, Tun.C_CYAN, 50.0, 0.5)
+				Audio.play("splash")
+		1: # attack
+			_fire_t -= dt
+			if _fire_t <= 0.0:
+				_fire_t = 1.6
+				if _can_fire():
+					for x in [-8.0, 0.0, 8.0]:
+						game.spawn_enemy("torpedo", {"pos": position + Vector2(x, 30)})
+					Audio.play("torpedo")
+			if int(_timer / 1.2) != int((_timer - dt) / 1.2) and _can_fire():
+				game.bullets.ring(position, 14, 75.0, Tun.B.SONAR, randf() * TAU)
+			if _timer >= 5.5:
+				_state = 2
+				_timer = 0.0
+				targetable = false
+				_vel = Vector2(randf_range(60, 210), randf_range(90, 160)) # next surfacing point
+				game.fx.ring(position, Tun.C_CYAN, 50.0, 0.5)
+				Audio.play("splash")
+		2: # diving: fade and move underwater
+			alpha = maxf(0.2, alpha - dt / 0.6)
+			position = position.move_toward(_vel, 90.0 * dt)
+			if _timer >= 2.0 and position.distance_to(_vel) < 1.0:
+				_state = 0
+
+
 # ----------------------------------------------------------------- damage
 
 func take_damage(amount: float) -> void:
@@ -355,7 +565,8 @@ func take_damage(amount: float) -> void:
 
 func _draw() -> void:
 	var mod := Color(6, 6, 6) if flash > 0.0 else Color.WHITE
-	match kind:
+	mod.a = alpha
+	match behaviour:
 		"turret":
 			draw_texture(_tex, -_tex.get_size() / 2.0, mod)
 			draw_set_transform(Vector2.ZERO, _gun_angle - PI / 2.0)
@@ -390,6 +601,25 @@ func _draw() -> void:
 			if _glow > 0.0 and int(_t * 12.0) % 2 == 0:
 				for i in 5:
 					draw_rect(Rect2((i - 2) * 6.0 - 1.5, 12, 2, 2), Tun.C_PALE)
+		"mine":
+			draw_texture(_tex, -_tex.get_size() / 2.0, mod)
+			if _state == 1 and int(_t * 16.0) % 2 == 0:
+				draw_circle(Vector2.ZERO, 9.0, Color(Tun.C_PINK, 0.5))
+		"harpooner":
+			if _glow > 0.0 and int(_t * 20.0) % 2 == 0:
+				var from := Vector2(0, 12)
+				draw_line(from, from + Vector2.from_angle(_gun_angle) * 600.0, Color(Tun.C_PINK, 0.6), 1.0)
+			draw_texture(_tex, -_tex.get_size() / 2.0, mod)
+		"torpedo":
+			draw_set_transform(Vector2.ZERO, _vel.angle() - PI / 2.0)
+			draw_texture(_tex, -_tex.get_size() / 2.0, mod)
+			draw_set_transform(Vector2.ZERO)
+		"barracuda":
+			if _state != 1:
+				for i in 3:
+					var r := fmod(_t * 20.0 + i * 8.0, 24.0) + 10.0
+					draw_arc(Vector2.ZERO, r, 0.0, TAU, 24, Color(Tun.C_CYAN, 0.35 * (1.0 - r / 34.0)), 1.0)
+			draw_texture(_tex, -_tex.get_size() / 2.0, mod)
 		"glitch", "note":
 			var bob := Vector2(0, roundf(sin(_t * 8.0)))
 			draw_texture(_tex, -_tex.get_size() / 2.0 + bob, mod)

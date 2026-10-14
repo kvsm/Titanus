@@ -37,14 +37,14 @@ Download it from the run's **Artifacts** (`titanus-debug-apk`). Pushing a `v*` t
 
 | Task | Command |
 |---|---|
-| Regenerate sprites, font, backgrounds and icons | `python3 tools/gen_sprites.py` (needs Pillow) |
+| Regenerate sprites, font, backgrounds and icons | `python3 tools/gen_sprites.py` (needs Pillow; Level 2 art lives in `tools/gen_sprites_sea.py`) |
 | Regenerate SFX and music | `python3 tools/gen_audio.py` (needs numpy and ffmpeg with libvorbis) |
-| Smoke test | `godot --headless --fixed-fps 60 -- --autotest [--weapon=vulcan\|laser\|wave] [--controls=tilt]` |
+| Smoke test | `godot --headless --fixed-fps 60 -- --autotest [--level=2] [--campaign] [--weapon=vulcan\|laser\|wave] [--controls=tilt]` |
 | Weapon balance table (see `docs/weapon_balance.md`) | `godot --headless -- --bench=docs/weapon_balance_raw.md` |
 | Screenshots of a full run | `godot --fixed-fps 60 -- --autotest --shots=/some/dir` |
 
 Where to change things:
 
 - Gameplay constants: `scripts/core/tun.gd`.
-- Level timeline (what spawns, when and where): `levels/level1.json`.
+- Level timelines (what spawns, when and where): `levels/level1.json`, `levels/level2.json`.
 - Art: any generated PNG can be replaced with hand-drawn art of the same name and size.

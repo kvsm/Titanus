@@ -885,4 +885,6 @@ if __name__ == "__main__":
     gen_haze()
     gen_title_art()
     gen_icon()
+    import gen_sprites_sea  # Level 2 (NEON TIDE) art
+    gen_sprites_sea.main()
     print("sprites written to", OUT)

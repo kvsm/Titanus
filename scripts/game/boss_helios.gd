@@ -1,22 +1,6 @@
 class_name BossHelios
-extends Node2D
+extends Boss
 ## TITAN-01 HELIOS (§9). Three phases: Arms -> Sun Core -> Supernova.
-
-class Part extends Target:
-	var boss: BossHelios
-	var part_name := ""
-	var score_base := 0
-
-	func take_damage(amount: float) -> void:
-		if dead or not targetable:
-			return
-		hp -= amount
-		flash = 0.05
-		Audio.play("hit", -10.0)
-		if hp <= 0.0:
-			hp = 0.0
-			dead = true
-			boss.on_part_destroyed(self)
 
 enum { ENTER, ARMS, CORE, SUPERNOVA, DYING, DONE }
 
@@ -25,11 +9,10 @@ const ARM_OFFSET := Vector2(52, 14)
 const CORE_OFFSET := Vector2(0, -1)
 const POD_OFFSET := Vector2(46, -21)
 
-var game: Game
 var state := ENTER
-var arm_l: Part
-var arm_r: Part
-var core: Part
+var arm_l: Boss.Part
+var arm_r: Boss.Part
+var core: Boss.Part
 
 var _t := 0.0
 var _phase_t := 0.0
@@ -57,7 +40,7 @@ var _core_tex: Texture2D
 
 
 func setup(g: Game) -> void:
-	game = g
+	super.setup(g)
 	_body_tex = Tun.tex("helios_body")
 	_plate_tex = Tun.tex("helios_plate")
 	_arm_tex = Tun.tex("helios_arm")
@@ -66,37 +49,12 @@ func setup(g: Game) -> void:
 	arm_l = _make_part("arm_l", Tun.HELIOS_ARM_HP, Vector2(11, 22), Vector2(-ARM_OFFSET.x, ARM_OFFSET.y), Tun.BOSS_PART_BONUS)
 	arm_r = _make_part("arm_r", Tun.HELIOS_ARM_HP, Vector2(11, 22), ARM_OFFSET, Tun.BOSS_PART_BONUS)
 	core = _make_part("core", Tun.HELIOS_CORE_HP, Vector2(13, 13), CORE_OFFSET, Tun.BOSS_KILL_BONUS)
-	for p: Part in [arm_l, arm_r, core]:
+	for p: Boss.Part in [arm_l, arm_r, core]:
 		p.targetable = false
 
 
-func _make_part(n: String, part_hp: float, half: Vector2, offset: Vector2, bonus: int) -> Part:
-	var p := Part.new()
-	p.boss = self
-	p.game = game
-	p.part_name = n
-	p.hp = part_hp
-	p.max_hp = part_hp
-	p.hit_half = half
-	p.position = offset
-	p.score_base = bonus
-	p.is_boss_part = true
-	add_child(p)
-	return p
-
-
-func parts() -> Array[Target]:
-	var out: Array[Target] = []
-	for p: Part in [arm_l, arm_r, core]:
-		if not p.dead and p.targetable:
-			out.append(p)
-	return out
-
-
-func hp_fraction() -> float:
-	var total := Tun.HELIOS_ARM_HP * 2.0 + Tun.HELIOS_CORE_HP
-	var cur := arm_l.hp + arm_r.hp + core.hp
-	return clampf(cur / total, 0.0, 1.0)
+func _make_part(n: String, part_hp: float, half: Vector2, offset: Vector2, bonus: int) -> Boss.Part:
+	return make_part(n, part_hp, half, offset, bonus)
 
 
 ## True if a player shot at `p` hits armour (and is absorbed).
@@ -116,10 +74,14 @@ func touches_player(p: Vector2) -> bool:
 	return absf(d.x) < BODY_HALF.x - 4 and absf(d.y) < BODY_HALF.y
 
 
+func is_done() -> bool:
+	return state == DONE
+
+
 func update(dt: float) -> void:
 	_t += dt
 	_phase_t += dt
-	for p: Part in [arm_l, arm_r, core]:
+	for p: Boss.Part in [arm_l, arm_r, core]:
 		p.flash = maxf(0.0, p.flash - dt)
 	match state:
 		ENTER:
@@ -261,7 +223,7 @@ func _check_beam(origin: Vector2) -> void:
 		p.hit()
 
 
-func on_part_destroyed(part: Part) -> void:
+func on_part_destroyed(part: Boss.Part) -> void:
 	part.targetable = false
 	game.on_boss_part_destroyed(part, part.score_base)
 	if part == core:
@@ -324,7 +286,7 @@ func _draw() -> void:
 	draw_texture(pt, Vector2(-pt.get_width() - slide + 1, plate_y))
 	draw_set_transform(Vector2.ZERO)
 	# arms
-	for arm: Part in [arm_l, arm_r]:
+	for arm: Boss.Part in [arm_l, arm_r]:
 		var mirror := arm == arm_r
 		var mod := white if arm.flash > 0.0 else Color.WHITE
 		var o := arm.position

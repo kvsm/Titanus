@@ -126,7 +126,7 @@ func _draw() -> void:
 	var hint := "STEER WITH ONE FINGER - 2ND FINGER BOMBS" if Save.control_scheme == "touch" \
 		else "TILT TO STEER - TAP TO BOMB"
 	PixelFont.draw(self, hint, Vector2(w / 2.0, 455), Tun.C_LAVENDER, 1, PixelFont.CENTER)
-	var best := Save.best_score(1)
+	var best := Save.best_overall()
 	if best > 0:
 		PixelFont.draw(self, "BEST %08d" % best, Vector2(w / 2.0, 372), Tun.C_YELLOW, 1, PixelFont.CENTER)
 	PixelFont.draw(self, "V" + str(ProjectSettings.get_setting("application/config/version")), Vector2(w - 3, h - 10), Tun.C_GRID, 1, PixelFont.RIGHT)

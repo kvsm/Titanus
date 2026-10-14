@@ -14,7 +14,7 @@ var _half: Array[Vector2] = []
 
 
 func _ready() -> void:
-	for n: String in ["b_pink", "b_orange", "b_big", "b_violet", "b_prism"]:
+	for n: String in ["b_pink", "b_orange", "b_big", "b_violet", "b_prism", "b_harpoon", "b_link", "b_geyser", "b_sonar"]:
 		var t := Tun.tex(n)
 		_tex.append(t)
 		_half.append((t.get_size() / 2.0).floor())
@@ -58,17 +58,30 @@ func update(dt: float) -> void:
 	var can_hit := player.can_be_hit()
 	var pp := player.position
 	var splits: Array[Vector2] = []
+	var links: Array[Vector2] = []
 	var i := 0
 	while i < pos.size():
+		var k := kind[i]
+		if k == Tun.B.GEYSER:
+			var v := vel[i]
+			v.y += Tun.GEYSER_GRAVITY * dt
+			vel[i] = v
 		var p := pos[i] + vel[i] * dt
 		pos[i] = p
+		var before := age[i]
 		age[i] += dt
-		if kind[i] == Tun.B.SHARD and age[i] >= Tun.SPLIT_TIME:
+		if k == Tun.B.SHARD and age[i] >= Tun.SPLIT_TIME:
 			# PRISM shard bursts into a ring of small bullets
 			splits.append(p)
 			_remove(i)
 			continue
-		if p.x < -16 or p.x > Tun.SCREEN.x + 16 or p.y < -16 or p.y > Tun.SCREEN.y + 16:
+		if k == Tun.B.HARPOON and int(age[i] / Tun.LINK_SPACING) != int(before / Tun.LINK_SPACING):
+			links.append(p) # harpoons leave a chain hanging in their wake
+		if k == Tun.B.LINK and age[i] >= Tun.LINK_LIFE:
+			_remove(i)
+			continue
+		var top := -240.0 if k == Tun.B.GEYSER else -16.0 # geyser droplets arc up and fall back
+		if p.x < -16 or p.x > Tun.SCREEN.x + 16 or p.y < top or p.y > Tun.SCREEN.y + 16:
 			_remove(i)
 			continue
 		if can_hit:
@@ -82,6 +95,8 @@ func update(dt: float) -> void:
 	for s in splits:
 		game.fx.spark(s, Tun.C_CYAN, 3)
 		ring(s, 6, 70.0, Tun.B.VIOLET, randf() * TAU)
+	for l in links:
+		fire(l, 0.0, 0.0, Tun.B.LINK)
 	queue_redraw()
 
 
@@ -116,4 +131,9 @@ func cancel(center: Vector2, radius: float = -1.0, cash: bool = false) -> int:
 func _draw() -> void:
 	for i in pos.size():
 		var k := kind[i]
-		draw_texture(_tex[k], (pos[i] - _half[k]).round())
+		if k == Tun.B.HARPOON:
+			draw_set_transform(pos[i].round(), vel[i].angle() - PI / 2.0)
+			draw_texture(_tex[k], -_half[k])
+			draw_set_transform(Vector2.ZERO)
+		else:
+			draw_texture(_tex[k], (pos[i] - _half[k]).round())

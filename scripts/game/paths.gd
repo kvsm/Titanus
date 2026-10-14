@@ -8,6 +8,8 @@ const POINTS := {
 	"swoop": [Vector2(-15, 70), Vector2(70, 150), Vector2(135, 210), Vector2(200, 160), Vector2(285, 60)],
 	"cross": [Vector2(-15, 50), Vector2(135, 170), Vector2(285, 290)],
 	"loop": [Vector2(80, -15), Vector2(80, 160), Vector2(120, 220), Vector2(170, 190), Vector2(150, 130), Vector2(100, 150), Vector2(80, 250), Vector2(80, 500)],
+	"zigzag": [Vector2(40, -15), Vector2(210, 80), Vector2(60, 170), Vector2(210, 260), Vector2(70, 350), Vector2(150, 500)],
+	"wake": [Vector2(-15, 120), Vector2(90, 150), Vector2(180, 110), Vector2(285, 140)],
 	"down_back": [Vector2(135, -15), Vector2(135, 150), Vector2(140, 195), Vector2(150, 150), Vector2(150, -20)],
 }
 

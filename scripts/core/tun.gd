@@ -105,15 +105,31 @@ const ENEMIES := {
 	# stronger late-level enemies
 	"prism": {"hp": 90.0, "half": Vector2(10, 11), "score": 1500, "tex": "prism"},
 	"equalizer": {"hp": 260.0, "half": Vector2(21, 11), "score": 3000, "tex": "equalizer"},
+	# Level 2: NEON TIDE
+	"jetski": {"hp": 4.0, "half": Vector2(5, 7), "score": 120, "tex": "jetski", "behaviour": "glitch"},
+	"mine": {"hp": 8.0, "half": Vector2(6, 6), "score": 400, "tex": "mine"},
+	"harpooner": {"hp": 26.0, "half": Vector2(9, 12), "score": 700, "tex": "harpooner"},
+	"inker": {"hp": 20.0, "half": Vector2(7, 9), "score": 600, "tex": "inker"},
+	"trawler": {"hp": 80.0, "half": Vector2(14, 12), "score": 2000, "tex": "trawler", "behaviour": "carrier"},
+	"torpedo_boat": {"hp": 130.0, "half": Vector2(11, 14), "score": 2500, "tex": "torpedo_boat"},
+	"frigate": {"hp": 300.0, "half": Vector2(14, 22), "score": 3500, "tex": "frigate"},
+	"torpedo": {"hp": 5.0, "half": Vector2(2, 6), "score": 50, "tex": "torpedo", "exempt": true},
+	"barracuda": {"hp": 1300.0, "half": Vector2(12, 32), "score": 12000, "tex": "barracuda"},
 }
+const INK_RADIUS := 22.0
+const INK_LIFE := 6.0
+const INK_SLOW := 0.5 # speed multiplier while in ink
 
 # random pickup drops from any enemy kill (each rolled independently)
 const DROP_CHANCE := {"shield": 0.01, "bomb": 0.01, "speed": 0.05}
 const SPLIT_TIME := 0.9 # PRISM shards burst after this many seconds
 
 # enemy bullet kinds: radius used for collision
-enum B { PINK, ORANGE, BIG, VIOLET, SHARD }
-const BULLET_R: Array[float] = [2.5, 2.5, 4.0, 2.5, 4.0]
+enum B { PINK, ORANGE, BIG, VIOLET, SHARD, HARPOON, LINK, GEYSER, SONAR }
+const BULLET_R: Array[float] = [2.5, 2.5, 4.0, 2.5, 4.0, 2.5, 2.0, 3.5, 2.5]
+const LINK_SPACING := 0.045 # seconds between chain links dropped by a harpoon
+const LINK_LIFE := 1.1 # chain links hang in place this long
+const GEYSER_GRAVITY := 150.0 # px/s^2 pulling geyser droplets back down
 
 # --- boss HELIOS (§9)
 const HELIOS_ARM_HP := 350.0
@@ -121,6 +137,13 @@ const HELIOS_CORE_HP := 1800.0
 const HELIOS_PHASE2_TIME := 35.0
 const HELIOS_PHASE3_FRACTION := 0.4
 const HELIOS_BULLET_SPEED := 1.15 # multiplier on every HELIOS bullet speed
+
+# --- boss LEVIATHAN (Level 2)
+const LEVIATHAN_FIN_HP := 450.0
+const LEVIATHAN_CORE_HP := 2400.0
+const LEVIATHAN_PHASE2_TIME := 35.0
+const LEVIATHAN_PHASE3_FRACTION := 0.4
+const LEVIATHAN_BULLET_SPEED := 1.0 # multiplier on every LEVIATHAN bullet speed
 
 # --- palette (§7.2)
 const C_MIDNIGHT := Color("0d0221")

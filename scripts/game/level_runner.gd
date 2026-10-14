@@ -6,6 +6,7 @@ extends RefCounted
 ##   bg       tile=outskirts|downtown
 ##   banner   text, sub
 ##   midboss  enemy=<kind>   (the timeline holds until it dies)
+##   storm    on=true|false   (rain + lightning overlay)
 ##   warning
 ##   boss
 ## `x` and `y` may be lists to spawn several enemies at once.
@@ -63,8 +64,10 @@ func _run(e: Dictionary) -> void:
 			game.hud.boss_target = m
 		"warning":
 			game.start_warning()
+		"storm":
+			game.bg.storm = bool(e.get("on", true))
 		"boss":
-			game.spawn_boss()
+			game.spawn_boss(str(e.get("name", "helios")))
 
 
 func _spawn(e: Dictionary) -> void:

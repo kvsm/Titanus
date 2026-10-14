@@ -80,9 +80,9 @@ func _draw() -> void:
 	# boss / mid-boss HP bar
 	var frac := -1.0
 	if is_instance_valid(boss_target):
-		if boss_target is BossHelios:
-			var b := boss_target as BossHelios
-			if b.state != BossHelios.DONE:
+		if boss_target is Boss:
+			var b := boss_target as Boss
+			if not b.is_done():
 				frac = b.hp_fraction()
 		elif boss_target is Enemy:
 			var e := boss_target as Enemy

@@ -88,7 +88,7 @@ Chosen with the CONTROLS button on the title screen or in the pause menu.
 | Lives | **3** to start. Extra lives at 500k points, then every 1M after that (1.5M, 2.5M, ...). |
 | Weapon on death | Weapon type kept, **power level −1** (minimum 1) |
 | Bombs on death | Reset to 2 if below 2 |
-| Game over | Back to the **start of the current level**. Beaten levels stay unlocked. |
+| Game over | Back to the **start of the current level**, with the loadout you entered it with (topped up to at least 3 lives). |
 
 ---
 
@@ -239,8 +239,11 @@ Expected fight length is ~40–50 s at weapon level 2–3. There is no timeout.
 - Optional CRT scanline overlay (on by default, can be turned off).
 - Score popups at the kill location, tinted by multiplier.
 
-### 10.3 Screen flow (first build)
-**Title** (logo, striped sun, START button, CONTROLS toggle) → **Level 1** → **Results** → back to Title.
+### 10.3 Screen flow
+**Title** (logo, striped sun, START button, CONTROLS toggle) → **Level 1** → **Results** → **Level 2** → **Results** → back to Title.
+
+- **Campaign carry-over:** score (including the end-of-level bonuses), lives, bombs, weapon type, weapon level and speed all carry into the next level. This is how the higher weapon levels (L8–L10) become reachable.
+- **No level select:** the campaign always starts at Level 1.
 **Pause menu:** Resume / Music volume / SFX volume / Vibration on/off / Scanlines on/off / Quit to title.
 Save data (`user://save.cfg`): unlocked levels, best score per level, settings.
 
@@ -294,7 +297,7 @@ tools/                   asset generator scripts (Python)
 2. **Chain strictness.** Is "any escapee breaks the chain" fun at this density, or should we add a short grace (e.g. 1 escape forgiven per section)?
 3. **Capsule colour cycling.** Does it work as the way to choose a weapon, or would fixed-colour drops be better?
 4. **Difficulty.** There's a single difficulty for now. Should we add Easy/Hard later (bullet speed and density scaling)?
-5. **Levels 2–5 themes** (to decide later), e.g. Synth Ocean, Chrome Desert, Orbital Highway, the Titan Forge.
+5. **Levels 3–5 themes** (to decide later), e.g. Chrome Desert, Orbital Highway, the Titan Forge.
 
 ---
 
@@ -308,3 +311,50 @@ Level 1 is fully implemented as described above. Known differences from this doc
 - **Audio:** all SFX and music are synthesised placeholders (`tools/gen_audio.py`).
 - **Art:** all sprites are generated placeholders (`tools/gen_sprites.py`).
 
+---
+
+## 15. Level 2: **NEON TIDE** (synthwave ocean)
+
+### 15.1 Look
+- **Water:** a night ocean. Deep blue-black water with a neon grid reflected in it; the grid lines ripple and wobble, and wave crests glint.
+- **Harbour tiles:** quays with containers, piers with moored speedboats, buoys and a lighthouse.
+- **Open-sea tiles:** neon oil rigs, rocks ringed with foam, and buoys.
+- **Spray:** a sea-spray layer replaces Level 1's haze.
+- **Maelstrom section:** a storm overlay with slanting rain, lightning flashes and distant thunder.
+
+### 15.2 Timeline (~2:45 total)
+
+| Time | Section | What happens |
+|---|---|---|
+| 0:00–0:38 | **A. Harbour** | Jetski squadrons (dive, zigzag and wake paths) and Harpooners. Mines appear from 0:20. Trawlers at 0:14 and 0:27. |
+| 0:38–1:16 | **B. Open sea** | Inkers, mine fields, Harpooners, and Torpedo Boats from 0:55. Trawlers at 0:45 and 1:00. |
+| 1:16–1:18 | **Mid-boss: BARRACUDA** | The scroll slows while it's alive. |
+| 1:18–1:45 | **C. Maelstrom** (storm) | Faster scroll. Sonar Frigates at 1:21 and 1:31, plus Torpedo Boats, Inkers, mines and jetskis. Trawlers at 1:25 and 1:36. |
+| 1:45–1:51 | **Warning** | |
+| 1:51– | **Boss: LEVIATHAN** | See §15.4. |
+
+### 15.3 Level 2 enemies
+
+| Enemy | HP | Points | Behaviour | Weapon |
+|---|---|---|---|---|
+| **JETSKI** | 4 | 120 | Fast formation flier | Occasional aimed shot |
+| **MINE** | 8 | 400 | Floats with the water, so it scrolls off the bottom (and breaks the chain) if you don't shoot it | **Proximity:** when you get within 70 px it arms, blinks for 0.6 s, then bursts into a 12-bullet ring. A detonation is neither a kill nor an escape. |
+| **HARPOONER** | 26 | 700 | Gunboat; stations, sways, leaves after 3 shots | **Harpoon:** a 0.8 s aim line, then a fast harpoon that **leaves a chain of hanging bullets** along its path for 1.1 s |
+| **INKER** | 20 | 600 | Squid drone; jet-propels down in bursts, leaves after 3 squirts | **Ink:** drops a puddle that drifts down the screen and **halves your speed** while you're in it, plus a slow 5-pellet fan |
+| **TRAWLER** | 80 | 2,000 | Supply ship (flies like the Level 1 carrier) | Rotating rings; **always drops a weapon capsule** |
+| **TORPEDO BOAT** (heavy, late) | 130 | 2,500 | Stations, leaves after 3 salvos | **Torpedoes:** launches pairs of shootable torpedoes (5 HP) that steer towards your column for 1.6 s, then accelerate straight down. Torpedoes give points but **never count for the chain or kill %**. |
+| **SONAR FRIGATE** (heavy, late) | 300 | 3,500 | Stations, leaves after 4 pings | **Sonar:** a 28-pellet ring with a gap, followed half a second later by an echo ring whose gap is shifted. The gap rotates 40° per ping. |
+| **Mid-boss BARRACUDA** (submarine) | 1,300 | 12,000 | Surfaces, attacks for 5.5 s, then **dives**: it fades, can't be hit, and resurfaces at a new spot | Torpedo salvos of 3 every 1.6 s, plus 14-pellet sonar rings |
+
+### 15.4 Boss: **TITAN-02 LEVIATHAN** (mecha-whale)
+A chrome mecha-whale swimming head-first towards the player, with its tail flukes at the top of the screen.
+
+**Parts:** two pectoral fin cannons (450 HP each), and a reactor core in its mouth (2,400 HP; it can only be hit once the jaw opens). The head armour absorbs shots until then.
+
+| Phase | Trigger | Pattern |
+|---|---|---|
+| **1: Fins** | Start | The fins take turns firing: a 0.45 s telegraph line, then a **harpoon with a chain**, plus two 3-way fans. The **blowhole geyser** throws 14 droplets upwards, which **arc over and rain down under gravity**. |
+| **2: Maw** | Both fins destroyed (or 35 s pass) | The jaw opens to expose the core, which sprays a **sweeping twin "krill" stream**. Geysers come faster. |
+| **3: Dive** | Core below 40% | A repeating cycle: it **dives** (fades, can't be hit), **3 of 5 lanes flash** as a warning, **tidal walls** of bullets rush down those lanes, then it resurfaces and attacks for 4 s. |
+
+All values are in `scripts/core/tun.gd` (`LEVIATHAN_*`).

@@ -71,20 +71,24 @@ jobs:
       - name: Import project
         run: ~/godot/godot --headless --import 2>&1 | tee import.log; ! grep -E "SCRIPT ERROR|Parse Error" import.log
 
-      - name: Smoke test (autopilot plays the whole level with each weapon)
+      - name: Smoke test (autopilot plays every level with each weapon, tilt, and the full campaign)
         run: |
-          for w in vulcan laser wave; do
-            echo "::group::autotest $w"
-            timeout 600 ~/godot/godot --headless --fixed-fps 60 -- --autotest --weapon=$w 2>&1 | tee autotest-$w.log
+          run() {
+            local name="$1"; shift
+            echo "::group::autotest $name"
+            timeout 600 ~/godot/godot --headless --fixed-fps 60 -- --autotest "$@" 2>&1 | tee "autotest-$name.log"
             echo "::endgroup::"
-            grep -q "AUTOTEST COMPLETE" autotest-$w.log || { echo "::error::autotest with $w did not finish the level"; exit 1; }
-            ! grep -E "SCRIPT ERROR|AUTOTEST TIMEOUT" autotest-$w.log || { echo "::error::autotest with $w hit errors"; exit 1; }
+            grep -q "AUTOTEST COMPLETE" "autotest-$name.log" || { echo "::error::autotest $name did not finish"; exit 1; }
+            ! grep -E "SCRIPT ERROR|AUTOTEST TIMEOUT" "autotest-$name.log" || { echo "::error::autotest $name hit errors"; exit 1; }
+          }
+          for level in 1 2; do
+            for w in vulcan laser wave; do
+              run "L$level-$w" --level=$level --weapon=$w
+            done
           done
-          echo "::group::autotest tilt controls"
-          timeout 600 ~/godot/godot --headless --fixed-fps 60 -- --autotest --controls=tilt 2>&1 | tee autotest-tilt.log
-          echo "::endgroup::"
-          grep -q "AUTOTEST COMPLETE" autotest-tilt.log || { echo "::error::autotest with tilt controls did not finish the level"; exit 1; }
-          ! grep -E "SCRIPT ERROR|AUTOTEST TIMEOUT" autotest-tilt.log || { echo "::error::autotest with tilt controls hit errors"; exit 1; }
+          run tilt --controls=tilt
+          run campaign --campaign
+          grep -q "AUTOTEST LEVEL 2 CLEAR" autotest-campaign.log || { echo "::error::campaign did not reach the end of level 2"; exit 1; }
 
       - name: Export debug APK
         env:

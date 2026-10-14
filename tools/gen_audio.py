@@ -346,8 +346,66 @@ def songs():
                 [0, 1, 2, 3, 2, 1, 2, 3], DRUMS_TITLE, lead=None)
 
 
+Em, Cmj, Gmj, Dmj = [52, 55, 59], [48, 52, 55], [55, 59, 62], [50, 54, 57]
+Cm, Ab, Bbm, Gm7 = [48, 51, 55], [44, 48, 51], [46, 50, 53], [43, 47, 50]
+
+
+def sea_songs():
+    lead_tide = [
+        (71, 1), (74, 1), (76, 2), (74, 1), (71, 1), (69, 2),
+        (67, 1), (69, 1), (71, 2), (74, 2), (76, 2),
+        (79, 1), (78, 1), (76, 2), (74, 1), (71, 1), (69, 2),
+        (71, 2), (74, 2), (78, 4),
+        (76, 1), (74, 1), (71, 2), (67, 2), (69, 2),
+        (71, 1), (72, 1), (74, 2), (76, 4),
+        (79, 2), (78, 2), (76, 2), (74, 2),
+        (71, 2), (69, 2), (71, 4),
+    ]
+    render_song("neon_tide", 104, 16, [Em, Em, Cmj, Cmj, Gmj, Gmj, Dmj, Dmj],
+                [0, None, 12, 0, None, 12, 0, 7], [0, 2, 1, 3, 1, 2, 0, 3], DRUMS_DRIVE,
+                lead=lead_tide, lead_from_bar=8, bass_cut=800)
+    lead_lev = [
+        (72, 0.5), (75, 0.5), (79, 1), (77, 0.5), (75, 0.5), (74, 1), (75, 2), (None, 2),
+        (68, 0.5), (72, 0.5), (75, 1), (74, 0.5), (72, 0.5), (70, 1), (72, 2), (None, 2),
+        (70, 0.5), (74, 0.5), (77, 1), (75, 0.5), (74, 0.5), (72, 1), (74, 2), (None, 2),
+        (71, 1), (74, 1), (77, 1), (79, 1), (83, 2), (79, 2),
+    ]
+    render_song("leviathan", 128, 16, [Cm, Cm, Ab, Ab, Bbm, Bbm, Gm7, Gm7],
+                [0, 0, 12, 0, 0, 12, 0, 12, 0, 0, 12, 0, 7, 12, 0, 12], [0, 2, 1, 3, 2, 0, 3, 1], DRUMS_BOSS,
+                lead=lead_lev + lead_lev, lead_from_bar=4, bass_cut=1200)
+
+
+def sea_sfx():
+    S = {}
+    d = 0.9
+    t = t_axis(d)
+    ping = osc("sine", 1350, d) * np.exp(-t / 0.18)
+    S["sonar"] = 0.5 * delay(ping, 0.22, 0.45, 3, 0.5)
+    S["mine_arm"] = np.concatenate([0.4 * osc("square", 1600, 0.06, 0.5) * exp_decay(0.06, 0.03), np.zeros(int(0.06 * SR)),
+                                    0.4 * osc("square", 1600, 0.06, 0.5) * exp_decay(0.06, 0.03)])
+    d = 0.45
+    S["splash"] = 0.7 * lowpass(osc("noise", 0, d), 3000) * env(d, 0.01, 0.1, 0.4, 0.3)
+    d = 0.35
+    whoosh = highpass(osc("noise", 0, d), 1500) * np.exp(-t_axis(d) / 0.12)
+    clank = osc("square", 520, d, 0.3) * np.exp(-t_axis(d) / 0.05)
+    S["harpoon"] = 0.5 * whoosh + 0.3 * clank
+    d = 0.6
+    bub = lowpass(osc("noise", 0, d), 700) * (0.5 + 0.5 * np.sin(2 * np.pi * 18 * t_axis(d)))
+    S["torpedo"] = 0.8 * bub * env(d, 0.02, 0.2, 0.5, 0.3)
+    d = 1.8
+    t = t_axis(d)
+    f = 70 + 40 * np.sin(np.pi * t / d) + 3 * np.sin(2 * np.pi * 6 * t)
+    S["whale"] = soft_clip(1.4 * lowpass(osc("saw", f, d) + 0.5 * osc("square", f * 1.5, d), 900) * env(d, 0.3, 0.0, 1.0, 0.6))
+    d = 0.8
+    S["geyser"] = 0.7 * lowpass(osc("noise", 0, d), 2200) * env(d, 0.05, 0.2, 0.6, 0.4)
+    for name, x in S.items():
+        write_wav(os.path.join(OUT, name + ".wav"), normalize(x, 0.8))
+
+
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
     sfx()
     songs()
+    sea_songs()
+    sea_sfx()
     print("audio written to", OUT)

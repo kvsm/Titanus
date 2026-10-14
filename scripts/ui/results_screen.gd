@@ -12,10 +12,15 @@ var _rank := "C"
 var _new_best := false
 
 
+## Final score for a cleared level: score plus the lives and bombs bonuses.
+static func total_for(s: Dictionary) -> int:
+	return int(s.score) + int(s.lives) * Tun.LIFE_BONUS + int(s.bombs) * Tun.BOMB_BONUS
+
+
 func _ready() -> void:
 	var lives_bonus := int(stats.lives) * Tun.LIFE_BONUS
 	var bomb_bonus := int(stats.bombs) * Tun.BOMB_BONUS
-	_total = int(stats.score) + lives_bonus + bomb_bonus
+	_total = total_for(stats)
 	var kill_pct := 100.0 * int(stats.kills) / maxf(1.0, float(stats.spawned))
 	_rows = [
 		["SCORE", "%d" % int(stats.score)],

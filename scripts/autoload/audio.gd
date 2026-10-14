@@ -3,10 +3,12 @@ extends Node
 
 const SFX := ["shot_vulcan", "shot_wave", "shot_laser", "enemy_shot", "hit", "explode_small", "explode_big",
 	"player_hit", "player_die", "pickup", "powerup", "extend", "menu", "menu_back", "bomb", "chain_lost",
-	"warning", "part_break", "telegraph", "beam"]
+	"warning", "part_break", "telegraph", "beam",
+	"sonar", "mine_arm", "splash", "harpoon", "torpedo", "whale", "geyser"]
 ## Minimum seconds between repeats of very frequent sounds.
 const THROTTLE := {"shot_vulcan": 0.1, "shot_wave": 0.12, "shot_laser": 0.3, "hit": 0.06, "enemy_shot": 0.06,
-	"explode_small": 0.04, "pickup": 0.05}
+	"explode_small": 0.04, "pickup": 0.05,
+	"sonar": 0.3, "torpedo": 0.15, "harpoon": 0.1, "splash": 0.1, "geyser": 0.3}
 const VOICES := 16
 
 var _streams := {}

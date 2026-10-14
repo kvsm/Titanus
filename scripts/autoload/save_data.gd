@@ -50,6 +50,14 @@ func best_score(level: int) -> int:
 	return int(best.get(level, 0))
 
 
+## Highest score reached in any level (scores accumulate through the campaign).
+func best_overall() -> int:
+	var b := 0
+	for k in best:
+		b = maxi(b, int(best[k]))
+	return b
+
+
 ## Returns true when the score is a new best.
 func submit_score(level: int, score: int) -> bool:
 	if score > best_score(level):

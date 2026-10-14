@@ -9,6 +9,9 @@ signal quit_to_title
 const PAUSE_RECT := Rect2(240, 0, 30, 22)
 
 var level_index := 1
+## Loadout carried in from the previous level (empty = fresh start):
+## score, lives, bombs, weapon, weapon_level, speed.
+var carry := {}
 var autotest := false
 var autotest_weapon := "" # forces this weapon during autotest
 var control_scheme := "touch" # "touch" (follow the finger) or "tilt"
@@ -22,11 +25,12 @@ var shots: PlayerShots
 var player: Player
 var bullets: BulletManager
 var fx: Fx
+var ink: InkPools
 var hud: Hud
 var pause_menu: PauseMenu
 var runner: LevelRunner
 var score := ScoreKeeper.new()
-var boss: BossHelios
+var boss: Boss
 
 var scroll_speed := 30.0
 var target_scroll := 30.0
@@ -56,6 +60,9 @@ func _ready() -> void:
 	add_child(bg)
 	ground_layer = Node2D.new()
 	add_child(ground_layer)
+	ink = InkPools.new()
+	ink.game = self
+	add_child(ink)
 	pickups = Pickups.new()
 	pickups.game = self
 	shots = PlayerShots.new()
@@ -94,7 +101,9 @@ func _ready() -> void:
 	runner = LevelRunner.new()
 	runner.game = self
 	runner.load_level("res://levels/level%d.json" % level_index)
+	bg.set_theme(str(runner.data.get("theme", "city")))
 	Audio.play_music(str(runner.data.get("music", "neon_drive")))
+	_apply_carry()
 	if autotest:
 		player.god = true
 
@@ -113,6 +122,8 @@ func _process(delta: float) -> void:
 		return
 	time += dt
 	_update_drive(dt)
+	ink.update(dt)
+	player.slow_mult = Tun.INK_SLOW if ink.slows(player.position) else 1.0
 	runner.update(dt)
 	scroll_speed = move_toward(scroll_speed, target_scroll, 20.0 * dt)
 	bg.scroll(scroll_speed * dt, dt)
@@ -264,7 +275,8 @@ func spawn_enemy(kind: String, params: Dictionary) -> Enemy:
 	e.setup(kind, params, self)
 	(ground_layer if e.ground else air_layer).add_child(e)
 	enemies.append(e)
-	score.spawned += 1
+	if not e.chain_exempt:
+		score.spawned += 1
 	return e
 
 
@@ -274,11 +286,28 @@ func remove_enemy(e: Enemy, _killed: bool) -> void:
 	e.queue_free()
 
 
-func spawn_boss() -> void:
-	boss = BossHelios.new()
+func _apply_carry() -> void:
+	if carry.is_empty():
+		return
+	score.score = int(carry.get("score", 0))
+	player.lives = int(carry.get("lives", Tun.LIVES))
+	player.bombs = int(carry.get("bombs", Tun.BOMBS_START))
+	player.weapon = str(carry.get("weapon", "vulcan"))
+	player.level = int(carry.get("weapon_level", 1))
+	player.speed = float(carry.get("speed", Tun.SPEED_BASE))
+	while _next_extend <= score.score:
+		_next_extend += Tun.EXTEND_EVERY
+
+
+func spawn_boss(boss_name: String = "helios") -> void:
+	match boss_name:
+		"leviathan":
+			boss = BossLeviathan.new()
+		_:
+			boss = BossHelios.new()
 	air_layer.add_child(boss)
 	boss.setup(self)
-	score.spawned += 3 # two arms + core count towards kill %
+	score.spawned += boss.all_parts.size() # every Titan part counts towards kill %
 	hud.boss_target = boss
 	Audio.play_music(str(runner.data.get("boss_music", "helios")))
 
@@ -286,10 +315,17 @@ func spawn_boss() -> void:
 # ------------------------------------------------------------------ events
 
 func on_enemy_killed(e: Enemy) -> void:
+	if e.chain_exempt:
+		# torpedoes: points only, no chain or kill credit
+		fx.popup(e.global_position, str(score.add(e.score_value)), Tun.C_PALE, 0.5)
+		fx.explode(e.global_position, 0)
+		Audio.play("explode_small")
+		remove_enemy(e, true)
+		return
 	var pts := score.kill(e.score_value)
 	fx.popup(e.global_position, str(pts), _popup_color())
-	var big := e.kind in ["carrier", "subwoofer", "prism", "equalizer"]
-	fx.explode(e.global_position, 3 if e.kind == "subwoofer" else (2 if big else 1))
+	var big := e.kind in ["carrier", "subwoofer", "prism", "equalizer", "trawler", "torpedo_boat", "frigate", "barracuda"]
+	fx.explode(e.global_position, 3 if e.kind in ["subwoofer", "barracuda"] else (2 if big else 1))
 	Audio.play("explode_big" if big else "explode_small")
 	if big:
 		shake(4.0)
@@ -305,6 +341,9 @@ func on_enemy_killed(e: Enemy) -> void:
 
 
 func on_enemy_escaped(e: Enemy) -> void:
+	if e.chain_exempt:
+		remove_enemy(e, false)
+		return
 	if score.break_chain():
 		hud.chain_lost()
 		Audio.play("chain_lost")
@@ -393,7 +432,7 @@ func _check_body_collisions() -> void:
 	if not player.can_be_hit():
 		return
 	for e in enemies:
-		if e.dead or e.ground:
+		if e.dead or e.ground or not e.targetable:
 			continue
 		if e.hit_test(player.position, Tun.PLAYER_HITBOX_R):
 			player.hit()
@@ -451,6 +490,9 @@ func _finish() -> void:
 		"spawned": score.spawned,
 		"lives": player.lives,
 		"bombs": player.bombs,
+		"weapon": player.weapon,
+		"weapon_level": player.level,
+		"speed": player.speed,
 	})
 
 
